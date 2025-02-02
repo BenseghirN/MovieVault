@@ -1,0 +1,20 @@
+﻿services:
+  db:
+    build: .
+    image: movievault-sqlserver2022
+    container_name: MovieVault-db
+    ports:
+      - "1433:1433"
+    volumes:
+      - ./Db:/usr/src/app
+    environment:
+      SA_PASSWORD: "K]xr!9*a>sPw"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U SA -P ${SA_PASSWORD} -Q 'SELECT 1'" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
