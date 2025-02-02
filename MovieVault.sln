@@ -13,8 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieVault.Test", "MovieVau
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9B330025-CD3F-4179-89FE-0B226B248627}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		docker-compose.yml = docker-compose.yml
 		Dockerfile = Dockerfile
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Db", "Db", "{36B66237-6FFF-4A2F-A476-9CBB2DE6AC15}"
