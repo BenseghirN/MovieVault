@@ -1,0 +1,26 @@
+@startuml Architecture
+scale 1.5
+skinparam linetype ortho
+skinparam rectangleBackgroundColor White
+skinparam rectangleBorderColor Black
+
+rectangle "MovieVault.UI" {
+  [WinForms Interface]
+}
+
+rectangle "MovieVault.Core" {
+  [Gestion des Films]
+  [Gestion des Utilisateurs]
+  [Logique Métier]
+}
+
+rectangle "MovieVault.Data" {
+  [Connexion SQL Server]
+  [Gestion ADO.NET]
+}
+
+[WinForms Interface] --> [Gestion des Films] #line.bold; : <b>Utilise
+[WinForms Interface] --> [Gestion des Utilisateurs] #line.bold; : <b>Utilise
+[Gestion des Films] --> [Connexion SQL Server] #line.bold; : <b>Requête SQL
+[Gestion des Utilisateurs] --> [Connexion SQL Server] #line.bold; : <b>Requête SQL
+@enduml

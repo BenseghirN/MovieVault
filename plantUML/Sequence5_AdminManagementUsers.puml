@@ -1,0 +1,50 @@
+@startuml AdminManagementUsers
+autonumber
+scale 1.5
+skinparam linetype ortho
+skinparam sequenceArrowColor #008080
+skinparam sequenceMessageAlign center
+
+actor Administrateur
+participant "Interface Admin" as UI
+participant "Service Administration" as Admin
+participant "Base de Données" as DB
+
+== Connexion à l'interface Admin ==
+Administrateur -> UI : <b>Se connecte au panneau d'administration
+UI -> Admin : <b>Vérifie permissions
+Admin -> DB : <b>Vérifie rôle admin
+DB --> Admin : <b>OK / Permission accordée
+Admin -> UI : <b>Affiche panneau Admin
+
+== Accès à la gestion des utilisateurs ==
+Administrateur -> UI : <b>Accède à la gestion des utilisateurs
+UI -> Admin : <b>Demande la liste des utilisateurs
+Admin -> DB : <b>Récupère tous les utilisateurs
+DB --> Admin : <b>Retourne la liste des utilisateurs
+Admin --> UI : <b>Envoie la liste des utilisateurs
+UI -> Administrateur : <b>Affiche la liste des utilisateurs
+
+== Modification d'un compte ==
+Administrateur -> UI : <b>Sélectionne un utilisateur
+UI -> Admin : <b>Demande informations utilisateur
+Admin -> DB : <b>Récupère les détails
+DB --> Admin : <b>Retourne les données
+Admin -> UI : <b>Affiche les détails
+
+alt Modification du compte
+    Administrateur -> UI : <b>Modifie le compte
+    UI -> Admin : <b>Applique modification
+    Admin -> DB : <b>Met à jour l'utilisateur
+    DB --> Admin : <b>Confirmation mise à jour
+end
+
+alt Suppression du compte
+    Administrateur -> UI : <b>Confirme la suppression
+    UI -> Admin : <b>Supprime l'utilisateur
+    Admin -> DB : <b>Supprime de la base
+    DB --> Admin : <b>Confirmation suppression
+end
+
+UI -> Administrateur : <b>Affiche confirmation
+@enduml

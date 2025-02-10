@@ -1,0 +1,80 @@
+@startuml MPD
+skinparam linetype ortho
+
+entity "Users" {
+  *UserId : INT <<PK>>
+  --
+  UserName : NVARCHAR(100)
+  Email : NVARCHAR(255) <<Unique>>
+  PasswordHash : NVARCHAR(255)
+}
+
+entity "Movies" {
+  *MovieId : INT <<PK>>
+  --
+  Title : NVARCHAR(255)
+  ReleaseYear : INT
+  Duration : INT
+  Synopsis : TEXT
+  PosterUrl : NVARCHAR(255)
+}
+
+entity "People" {
+  *PersonId : INT <<PK>>
+  --
+  FirstName : NVARCHAR(100)
+  LastName : NVARCHAR(100)
+  BirthDate : DATE
+  Nationality : NVARCHAR(100)
+  PhotoUrl : NVARCHAR(255)
+}
+
+entity "Genres" {
+  *GenreId : INT <<PK>>
+  --
+  GenreName : NVARCHAR(50) <<Unique>>
+}
+
+entity "Reviews" {
+  *ReviewId : INT <<PK>>
+  --
+  UserId : INT <<FK>>
+  MovieId : INT <<FK>>
+  Comment : TEXT
+  Rating : INT
+  ReviewDate : DATETIME
+}
+
+entity "UserMovies" {
+  *UserId : INT <<PK, FK>>
+  *MovieId : INT <<PK, FK>>
+  --
+  Status : NVARCHAR(100)
+  Owned : BIT
+  AddedDate : DATE
+  LastWatched : DATE
+}
+
+entity "MoviesPeople" {
+  *MovieId : INT <<PK, FK>>
+  *PersonId : INT <<PK, FK>>
+  --
+  Role : INT <<Enum>>
+}
+
+entity "MoviesGenres" {
+  *MovieId : INT <<PK, FK>>
+  *GenreId : INT <<PK, FK>>
+}
+
+' Relations entre les tables
+Users ||--o{ Reviews #line.bold;line:Lime;
+Movies ||--o{ Reviews #line.bold;line:Cyan;
+Movies ||--o{ MoviesPeople #line.bold;line:Purple;
+People ||--o{ MoviesPeople #line.bold;line:Orange;
+Movies ||--o{ MoviesGenres #line.bold;line:Red;
+Users ||--o{ UserMovies #line.bold;
+Movies ||--o{ UserMovies #line.bold;line:DeepPink;
+Genres ||--o{ MoviesGenres #line.bold;line:DarkOliveGreen;
+
+@enduml

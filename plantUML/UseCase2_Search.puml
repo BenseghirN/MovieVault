@@ -1,0 +1,13 @@
+@startuml Search
+scale 2
+left to right direction
+skinparam PackageStyle rect
+skinparam linetype ortho
+actor Utilisateur
+rectangle "Recherche de Film" {
+  Utilisateur -- (Rechercher un film) #line.bold;  
+  (Rechercher un film) .> (Filtrer par Titre, Réalisateur, Année, Genre) #line.bold;line.dashed; : <b>include
+  (Rechercher un film) .> (Rechercher via TMDB) #line.bold;line.dashed; : <b>auto include
+  (Rechercher via TMDB) .> (Gérer les doublons) #line.bold;line.dashed; : <b>auto include
+}
+@enduml

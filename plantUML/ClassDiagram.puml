@@ -1,0 +1,54 @@
+@startuml ClassDiagram
+skinparam linetype ortho
+
+class Users {
+  - UserId : int
+  - UserName : string
+  - Email : string
+  - PasswordHash : string
+  --
+  + GetMoviesOwned() : List<Movie>
+  + GetWatchedMovies() : List<Movie>
+}
+
+class Movies {
+  - MovieId : int
+  - Title : string
+  - ReleaseYear : int
+  - Duration : int
+  - Synopsis : string
+  - PosterUrl : string
+  --
+  + GetGenres() : List<Genre>
+  + GetCast() : List<Person>
+  + GetReviews() : List<Review>
+}
+
+class People {
+  - PersonId : int
+  - FirstName : string
+  - LastName : string
+  - BirthDate : DateTime
+  - Nationality : string
+  - PhotoUrl : string
+}
+
+class Genres {
+  - GenreId : int
+  - GenreName : string
+}
+
+class Reviews {
+  - ReviewId : int
+  - Comment : string
+  - Rating : int
+  - ReviewDate : DateTime
+}
+
+Users "<b>1" -- "<b>0..*" Movies #line.bold;line:Red;text:Red; : <b>Possède / A vu
+Movies "<b>1" -- "<b>0..*" People #line.bold;line:Cyan;text:Cyan; : <b>Impliqué
+Movies "<b>1" -- "<b>0..*" Genres #line.bold; : <b>Classifié sous
+Users "<b>1" -- "<b>0..*" Reviews #line.bold;line:Lime;text:Lime; : <b>Rédige
+Movies "<b>1" -- "<b>0..*" Reviews #line.bold;line:LightPink;text:LightPink; : <b>A des avis
+
+@enduml

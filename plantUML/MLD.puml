@@ -1,0 +1,79 @@
+@startuml MLD
+skinparam linetype ortho
+
+entity "Users" {
+  *UserId : INT <<PK, AUTO_INCREMENT>>
+  --
+  UserName : NVARCHAR(100) <<NOT NULL>>
+  Email : NVARCHAR(255) <<UNIQUE, NOT NULL>>
+  PasswordHash : NVARCHAR(255) <<NOT NULL>>
+}
+
+entity "Movies" {
+  *MovieId : INT <<PK, AUTO_INCREMENT>>
+  --
+  Title : NVARCHAR(255) <<NOT NULL>>
+  ReleaseYear : INT <<CHECK (ReleaseYear >= 1888)>>
+  Duration : INT <<CHECK (Duration > 0)>>
+  Synopsis : TEXT
+  PosterUrl : NVARCHAR(255)
+}
+
+entity "People" {
+  *PersonId : INT <<PK, AUTO_INCREMENT>>
+  --
+  FirstName : NVARCHAR(100) <<NOT NULL>>
+  LastName : NVARCHAR(100) <<NOT NULL>>
+  BirthDate : DATE
+  Nationality : NVARCHAR(100)
+  PhotoUrl : NVARCHAR(255)
+}
+
+entity "Genres" {
+  *GenreId : INT <<PK, AUTO_INCREMENT>>
+  --
+  GenreName : NVARCHAR(50) <<UNIQUE, NOT NULL>>
+}
+
+entity "Reviews" {
+  *ReviewId : INT <<PK, AUTO_INCREMENT>>
+  --
+  UserId : INT <<FK, NOT NULL>>
+  MovieId : INT <<FK, NOT NULL>>
+  Comment : TEXT
+  Rating : INT <<CHECK (Rating BETWEEN 1 AND 5)>>
+  ReviewDate : DATETIME <<DEFAULT GETDATE()>>
+}
+
+entity "UserMovies" {
+  *UserId : INT <<PK, FK>>
+  *MovieId : INT <<PK, FK>>
+  --
+  Status : NVARCHAR(100)
+  Owned : BIT <<DEFAULT 0>>
+  AddedDate : DATE <<DEFAULT GETDATE()>>
+  LastWatched : DATE
+}
+
+entity "MoviesPeople" {
+  *MovieId : INT <<PK, FK>>
+  *PersonId : INT <<PK, FK>>
+  --
+  Role : INT <<Enum>>
+}
+
+entity "MoviesGenres" {
+  *MovieId : INT <<PK, FK>>
+  *GenreId : INT <<PK, FK>>
+}
+
+Users ||--o{ Reviews #line.bold;line:Lime;text:Lime; : <b>1,N
+Movies ||--o{ Reviews #line.bold;line:Cyan;text:Cyan; : <b>1,N
+Movies ||--o{ MoviesPeople #line.bold;line:Purple;text:Purple; : <b>1,N
+People ||--o{ MoviesPeople #line.bold;line:Orange;text:Orange; : <b>1,N
+Movies ||--o{ MoviesGenres #line.bold;line:Red;text:Red; : <b>1,N
+Users ||--o{ UserMovies #line.bold; : <b>1,N
+Movies ||--o{ UserMovies #line.bold;line:DeepPink;text:DeepPink; : <b>1,N
+Genres ||--o{ MoviesGenres #line.bold;line:DarkOliveGreen;text:DarkOliveGreen; : <b>1,N
+
+@enduml

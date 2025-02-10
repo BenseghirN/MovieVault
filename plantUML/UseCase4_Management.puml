@@ -1,0 +1,14 @@
+@startuml Management
+scale 2
+left to right direction
+skinparam PackageStyle rect
+skinparam linetype ortho
+actor Utilisateur
+rectangle "Gestion de la Vidéothèque" {
+  Utilisateur -- (Consulter sa vidéothèque) #line.bold;
+  (Consulter sa vidéothèque) .> (Afficher la fiche d’un film) #line.bold;line.dashed; : <b>include
+  (Afficher la fiche d’un film) .> (Attribuer un statut) #line.bold;line.dashed;line:MediumPurple;text:MediumPurple; : <b>include
+  (Afficher la fiche d’un film) .> (Laisser une note et un commentaire) #line.bold;line.dashed;line:Lime;text:Lime; : <b>include
+  (Afficher la fiche d’un film) .> (Supprimer le film de la collection) #line.bold;line.dashed; : <b>include
+}
+@enduml

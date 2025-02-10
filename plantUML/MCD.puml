@@ -1,0 +1,52 @@
+@startuml MCD
+skinparam linetype ortho
+
+entity "Users" {
+  *UserId : INT <<PK>>
+  --
+  UserName : NVARCHAR(100)
+  Email : NVARCHAR(255) <<Unique>>
+  PasswordHash : NVARCHAR(255)
+}
+
+entity "Movies" {
+  *MovieId : INT <<PK>>
+  --
+  Title : NVARCHAR(255)
+  ReleaseYear : INT
+  Duration : INT
+  Synopsis : TEXT
+  PosterUrl : NVARCHAR(255)
+}
+
+entity "People" {
+  *PersonId : INT <<PK>>
+  --
+  FirstName : NVARCHAR(100)
+  LastName : NVARCHAR(100)
+  BirthDate : DATE
+  Nationality : NVARCHAR(100)
+  PhotoUrl : NVARCHAR(255)
+}
+
+entity "Genres" {
+  *GenreId : INT <<PK>>
+  --
+  GenreName : NVARCHAR(50) <<Unique>>
+}
+
+entity "Reviews" {
+  *ReviewId : INT <<PK>>
+  --
+  Comment : TEXT
+  Rating : INT
+  ReviewDate : DATETIME
+}
+
+Users ||--o{ Reviews #line.bold;line:Green;text:Green; : <b>1,N\n<b>(rédige)
+Movies ||--o{ Reviews #line.bold;line:Orange;text:Orange; : <b>1,N\n<b>(est jugé par)
+Movies ||--o{ People #line.bold;line:Blue;text:Blue; : <b>1,N\n<b>(a réalisé)
+People ||--o{ Movies #line.bold; : <b>1,N\n<b>(a joué dans)
+Movies ||--o{ Genres #line.bold;line:Purple;text:Purple; : <b>1,N\n<b>(classé sous)
+Users ||--o{ Movies #line.bold;line:Red;text:Red; : <b>1,N\n<b>(Possède/A vu)
+@enduml

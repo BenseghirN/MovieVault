@@ -1,0 +1,15 @@
+@startuml SearchAndAdd
+scale 2
+left to right direction
+skinparam PackageStyle rect
+skinparam linetype ortho
+actor Utilisateur
+rectangle "Gestion d'un Film dans la Collection" {
+  Utilisateur -- (Rechercher un film) #line.bold;  
+  (Rechercher un film) .> (Afficher la fiche du film) #line.bold;line.dashed; : <b>include
+  (Afficher la fiche du film) .> (Ajouter le film à sa collection) #line.bold;line.dashed; : <b>include
+  (Ajouter le film à sa collection) .> (Supprimer le film de la collection) #line.bold;line.dashed;line:Lime;text:Lime; : <b>include
+  (Ajouter le film à sa collection) .> (Laisser une note et un commentaire) #line.bold;line.dashed;line:MediumPurple;text:MediumPurple; : <b>include
+  (Ajouter le film à sa collection) .> (Attribuer un statut) #line.bold;line.dashed; : <b>extend
+}
+@enduml

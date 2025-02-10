@@ -1,0 +1,38 @@
+@startuml Login
+autonumber
+scale 1.5
+skinparam linetype ortho
+skinparam sequenceArrowColor #008080
+skinparam sequenceMessageAlign center
+
+actor Utilisateur
+participant "Interface Login" as UI
+participant "Service Authentification" as Auth
+participant "Base de Données" as DB
+
+Utilisateur -> UI : <b>Saisit UserName & Mot de passe
+UI -> Auth : <b>Vérifie les identifiants
+Auth -> DB : <b>Recherche Utilisateur avec UserName
+DB --> Auth : <b>Retourne les infos utilisateur
+
+alt Identifiants corrects
+    Auth -> UI : <b>Connexion réussie
+    UI -> Utilisateur : <b>Redirige vers l’espace personnel
+else Identifiants incorrects
+    Auth -> UI : <b>Erreur d'authentification
+    UI -> Utilisateur : <b>Affiche un message d'erreur
+end
+
+Utilisateur -> UI : <b>Clique sur "Mot de passe oublié"
+UI -> Auth : <b>Demande de réinitialisation
+Auth -> DB : <b>Vérifie si le UserName existe
+DB --> Auth : <b>OK / Utilisateur trouvé
+Auth -> UI : <b>Envoie email avec lien de réinitialisation
+
+Utilisateur -> UI : <b>Saisit un nouveau mot de passe
+UI -> Auth : <b>Vérifie critères et met à jour
+Auth -> DB : <b>Hash & Sauvegarde le mot de passe
+DB --> Auth : <b>Confirmation mise à jour
+Auth -> UI : <b>Mot de passe mis à jour
+UI -> Utilisateur : <b>Message de confirmation
+@enduml

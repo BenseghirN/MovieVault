@@ -1,0 +1,49 @@
+@startuml Management
+autonumber
+scale 1.5
+skinparam linetype ortho
+skinparam sequenceArrowColor #008080
+skinparam sequenceMessageAlign center
+
+actor Utilisateur
+participant "Interface Collection" as UI
+participant "Service Collection" as Collection
+participant "Base de Données" as DB
+
+Utilisateur -> UI : <b>Accède à sa collection
+UI -> Collection : <b>Demande la liste des films enregistrés
+Collection -> DB : <b>Récupère les films de UserMovies
+DB --> Collection : <b>Retourne les films
+Collection -> UI : <b>Affiche la liste
+
+Utilisateur -> UI : <b>Sélectionne un film
+UI -> Collection : <b>Vérifie la présence du film
+Collection -> DB : <b>Recherche dans UserMovies
+DB --> Collection : <b>Retourne les infos du film
+
+alt Film présent dans la collection
+    UI -> Utilisateur : <b>Affiche les options (Supprimer, Modifier statut, Ajouter une note)
+
+    alt Modification du statut</b>
+        Utilisateur -> UI : <b>Modifie le statut
+        UI -> Collection : <b>Met à jour UserMovies
+        Collection -> DB : <b>Sauvegarde le nouveau statut
+    end
+
+    alt Ajout d'une note et d’un commentaire
+        Utilisateur -> UI : <b>Ajoute une note et un commentaire
+        UI -> Collection : <b>Met à jour Reviews
+        Collection -> DB : <b>Sauvegarde l’avis
+    end
+
+    alt Suppression du film
+        Utilisateur -> UI : <b>Confirme la suppression
+        UI -> Collection : <b>Supprime le film de UserMovies
+        Collection -> DB : <b>Supprime l'entrée correspondante
+    end
+
+    UI -> Utilisateur : <b>Affiche confirmation
+else Film non trouvé
+    UI -> Utilisateur : <b>Affiche un message d'erreur
+end
+@enduml

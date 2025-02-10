@@ -1,0 +1,28 @@
+@startuml Search
+autonumber
+scale 1.5
+skinparam linetype ortho
+skinparam sequenceArrowColor #008080
+skinparam sequenceMessageAlign center
+
+actor Utilisateur
+participant "Interface Recherche" as UI
+participant "Service Recherche" as Search
+participant "Base de Données" as DB
+participant "API TMDB" as TMDB
+
+Utilisateur -> UI : <b>Saisit un critère de recherche
+UI -> Search : <b>Transmet la requête
+
+par Recherche en parallèle
+    Search -> DB : <b>Recherche en local
+    DB --> Search : <b>Retourne films trouvés
+
+    Search -> TMDB : <b>Recherche via API TMDB
+    TMDB --> Search : <b>Retourne films externes
+end
+
+Search -> Search : <b>Fusionner résultats et supprimer doublons
+Search -> UI : <b>Affiche résultats filtrés
+UI -> Utilisateur : <b>Affiche liste des films
+@enduml

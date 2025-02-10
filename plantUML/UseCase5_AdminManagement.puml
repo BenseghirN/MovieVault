@@ -1,0 +1,21 @@
+@startuml AdminManagement
+scale 2
+left to right direction
+skinparam PackageStyle rect
+skinparam linetype ortho
+actor Administrateur
+rectangle "Gestion des Référentiels et Administration" {
+  Administrateur -- (Accéder au panneau d'administration) #line.bold;
+  (Accéder au panneau d'administration) .> (Gérer les utilisateurs) #line.bold;line.dashed;line:Lime;text:Lime; : <b>include
+  (Accéder au panneau d'administration) .> (Gérer les films) #line.bold;line.dashed;line:MediumPurple;text:MediumPurple; : <b>include
+  (Accéder au panneau d'administration) .> (Gérer les avis) : <b>include
+
+  (Gérer les utilisateurs) .> (Modifier un compte) #line.bold;line.dashed;line:Lime;text:Lime; : <b>include
+  (Gérer les utilisateurs) .> (Supprimer un compte) #line.bold;line.dashed;line:Lime;text:Lime; : <b>include
+
+  (Gérer les films) .> (Supprimer un film) #line.bold;line.dashed;line:MediumPurple;text:MediumPurple; : <b>include
+  (Gérer les films) .> (Modifier un film) #line.bold;line.dashed;line:MediumPurple;text:MediumPurple; : <b>include
+
+  (Gérer les avis) .> (Supprimer un avis) #line.bold;line.dashed; : <b>include
+}
+@enduml
