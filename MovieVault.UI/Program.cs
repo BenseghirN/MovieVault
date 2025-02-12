@@ -1,6 +1,3 @@
-using Microsoft.Data.SqlClient;
-using MovieVault.Data;
-
 namespace MovieVault.UI
 {
     internal static class Program

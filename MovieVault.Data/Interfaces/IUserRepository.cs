@@ -1,12 +1,13 @@
 ﻿using MovieVault.Data.Models;
 
-namespace MovieVault.Data.Interfaces;
-
-public interface IUserRepository
+namespace MovieVault.Data.Interfaces
 {
-    User GetUserById(int userId);
-    User GetUserByEmail(string email);
-    bool CreateUser(User user);
-    bool UpdateUser(User user);
-    bool DeleteUser(int userId);
+    public interface IUserRepository
+    {
+        Task<User?> GetUserByIdAsync(int userId);
+        Task<User?> GetUserByEmailAsync(string email);
+        Task<bool> CreateUserAsync(User user);
+        Task<bool> UpdateUserAsync(User user);
+        Task<bool> DeleteUserAsync(int userId);
+    }
 }

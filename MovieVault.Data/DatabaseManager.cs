@@ -1,44 +1,18 @@
 ﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Serilog;
+using MovieVault.Data.Interfaces;
+using MovieVault.Data.Utilities;
 using System.Data;
+using System.Data.Common;
 
 namespace MovieVault.Data
 {
-    public static class DatabaseManager
+    public class DatabaseManager : IDatabaseManager
     {
-        private static readonly string _connectionString;
-        private static readonly Microsoft.Extensions.Logging.ILogger _logger;
-        private static readonly ILoggerFactory _loggerFactory;
+        private readonly string _connectionString = DatabaseManagerConfig.GetConnectionString();
+        private readonly ILogger<DatabaseManager> _logger = DatabaseManagerConfig.GetLogger<DatabaseManager>();
 
-        static DatabaseManager()
-        {
-            var logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MovieVault", "logs", "database.log");
-            Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
-
-            // Initiate Serilog
-            Log.Logger = new LoggerConfiguration()
-                .WriteTo.File(logPath, rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7) // Keep 7 days
-                .CreateLogger();
-
-            Log.Information("Initializing DatabaseManager...");
-            _loggerFactory = LoggerFactory.Create(builder =>
-            {
-                builder.AddSerilog();
-            });
-            _logger = _loggerFactory.CreateLogger("DatabaseManager");
-
-            var config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .Build();
-
-            _connectionString = config.GetConnectionString("MovieVaultDB")
-                ?? throw new InvalidOperationException("Database connection string is missing.");
-        }
-
-        public static async Task<SqlConnection> OpenConnectionAsync()
+        public async Task<SqlConnection> OpenConnectionAsync()
         {
             try
             {
@@ -55,7 +29,7 @@ namespace MovieVault.Data
             }
         }
 
-        public static async Task CloseConnectionAsync(SqlConnection connection)
+        public async Task CloseConnectionAsync(SqlConnection connection)
         {
             if (connection != null && connection.State != ConnectionState.Closed)
             {
@@ -65,7 +39,7 @@ namespace MovieVault.Data
         }
 
         // For SQL `INSERT`, `UPDATE`, `DELETE`
-        public static async Task<int> ExecuteQueryAsync(string query, params SqlParameter[] parameters)
+        public async Task<int> ExecuteQueryAsync(string query, params SqlParameter[] parameters)
         {
             try
             {
@@ -89,13 +63,36 @@ namespace MovieVault.Data
             }
         }
 
-        // For SQL `SELECT`
-        public static async Task<SqlDataReader> ExecuteReaderAsync(string query, params SqlParameter[] parameters)
+        public async Task<int> ExecuteQueryAsync(string query, SqlTransaction transaction, params SqlParameter[] parameters)
         {
             try
             {
-                var connection = await OpenConnectionAsync();
-                var command = new SqlCommand(query, connection);
+                await using var command = new SqlCommand(query, transaction.Connection, transaction);
+
+                if (parameters != null)
+                    command.Parameters.AddRange(parameters);
+
+                _logger.LogInformation($"Executing Query with Transaction: {query}");
+
+                int result = await command.ExecuteNonQueryAsync();
+                _logger.LogInformation($"Query executed successfully in transaction, affected rows: {result}");
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"SQL Execution Error in Transaction: {ex.Message}");
+                throw;
+            }
+        }
+
+        // For SQL `SELECT`
+        public async Task<DbDataReader> ExecuteReaderAsync(string query, params SqlParameter[] parameters)
+        {
+            try
+            {
+                await using var connection = await OpenConnectionAsync();
+                await using var command = new SqlCommand(query, connection);
 
                 if (parameters != null)
                     command.Parameters.AddRange(parameters);
@@ -111,7 +108,70 @@ namespace MovieVault.Data
             }
         }
 
-        public static async Task<bool> TestConnectionAsync()
+        public async Task<DbDataReader> ExecuteReaderAsync(string query, SqlTransaction transaction, params SqlParameter[] parameters)
+        {
+            try
+            {
+                await using var command = new SqlCommand(query, transaction.Connection, transaction);
+
+                if (parameters != null)
+                    command.Parameters.AddRange(parameters);
+
+                _logger.LogInformation($"Executing Reader Query with Transaction: {query}");
+
+                return await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"SQL Reader Execution Error in Transaction: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<object?> ExecuteScalarAsync(string query, params SqlParameter[] parameters)
+        {
+            try
+            {
+                await using var connection = await OpenConnectionAsync();
+                await using var command = new SqlCommand(query, connection);
+
+                if (parameters != null)
+                    command.Parameters.AddRange(parameters);
+
+                _logger.LogInformation($"Executing Scalar Query: {query}");
+
+                var result = await command.ExecuteScalarAsync();
+                return result != DBNull.Value ? result : null; // Return null if DBNull from SQL
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"SQL Scalar Execution Error: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<object?> ExecuteScalarAsync(string query, SqlTransaction transaction, params SqlParameter[] parameters)
+        {
+            try
+            {
+                await using var command = new SqlCommand(query, transaction.Connection, transaction);
+
+                if (parameters != null)
+                    command.Parameters.AddRange(parameters);
+
+                _logger.LogInformation($"Executing Scalar Query with Transaction: {query}");
+
+                var result = await command.ExecuteScalarAsync();
+                return result != DBNull.Value ? result : null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"SQL Scalar Execution Error in Transaction: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<bool> TestConnectionAsync()
         {
             try
             {
