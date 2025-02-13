@@ -4,6 +4,7 @@ namespace MovieVault.Core.Interfaces
 {
     public interface IUserService
     {
+        Task<IEnumerable<User>> GetAllUsersAsync();
         Task<User> GetUserByIdAsync(int userId);
         Task<User> GetUserByEmailAsync(string email);
         Task<bool> RegisterUserAsync(string userName, string email, string password);

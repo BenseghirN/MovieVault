@@ -4,12 +4,12 @@ using Serilog;
 
 namespace MovieVault.Data.Utilities
 {
-    public class DatabaseManagerConfig
+    public class DBHelperConfiguration
     {
         private static readonly IConfiguration _configuration;
         private static readonly ILoggerFactory _loggerFactory;
 
-        static DatabaseManagerConfig()
+        static DBHelperConfiguration()
         {
             var logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MovieVault", "logs", "database.log");
             Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
@@ -19,7 +19,7 @@ namespace MovieVault.Data.Utilities
                 .WriteTo.File(logPath, rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7) // Keep 7 days
                 .CreateLogger();
 
-            Log.Information("Initializing DatabaseManager...");
+            Log.Information("Initializing DBHelper...");
 
             // Chargement de la configuration depuis l'UI (appsettings.json)
             _configuration = new ConfigurationBuilder()

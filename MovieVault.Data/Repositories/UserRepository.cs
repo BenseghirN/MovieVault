@@ -1,32 +1,28 @@
 ﻿using Microsoft.Data.SqlClient;
 using MovieVault.Data.Interfaces;
 using MovieVault.Data.Models;
+using MovieVault.Data.Utilities;
+using System.Data;
 
 namespace MovieVault.Data.Repositories
 {
-    public class UserRepository(IDatabaseManager databaseManager) : IUserRepository
+    public class UserRepository(IDBHelper idbHelper) : IUserRepository
     {
-        private readonly IDatabaseManager _databaseManager = databaseManager ?? throw new ArgumentNullException(nameof(databaseManager));
+        private readonly IDBHelper _idbHelper = idbHelper ?? throw new ArgumentNullException(nameof(idbHelper));
+
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        {
+            var query = "SELECT * FROM Users";
+            return await _idbHelper.ExecuteReaderAsync(query, MapToUser);
+        }
 
         public async Task<User?> GetUserByIdAsync(int userId)
         {
             var query = "SELECT * FROM Users WHERE UserId = @UserId";
             var parameters = new SqlParameter[] { new SqlParameter("@UserId", userId) };
 
-            using (var reader = await _databaseManager.ExecuteReaderAsync(query, parameters))
-            {
-                if (await reader.ReadAsync())
-                {
-                    return new User
-                    {
-                        UserId = reader.GetInt32(reader.GetOrdinal("UserId")),
-                        UserName = reader.GetString(reader.GetOrdinal("UserName")),
-                        Email = reader.GetString(reader.GetOrdinal("Email")),
-                        PasswordHash = reader.GetString(reader.GetOrdinal("PasswordHash"))
-                    };
-                }
-            }
-            return null;
+            var users = await _idbHelper.ExecuteReaderAsync(query, MapToUser, parameters);
+            return users.SingleOrDefault();
         }
 
         public async Task<User?> GetUserByEmailAsync(string email)
@@ -34,25 +30,13 @@ namespace MovieVault.Data.Repositories
             var query = "SELECT * FROM Users WHERE Email = @Email";
             var parameters = new SqlParameter[] { new SqlParameter("@Email", email) };
 
-            using (var reader = await _databaseManager.ExecuteReaderAsync(query, parameters))
-            {
-                if (await reader.ReadAsync())
-                {
-                    return new User
-                    {
-                        UserId = reader.GetInt32(reader.GetOrdinal("UserId")),
-                        UserName = reader.GetString(reader.GetOrdinal("UserName")),
-                        Email = reader.GetString(reader.GetOrdinal("Email")),
-                        PasswordHash = reader.GetString(reader.GetOrdinal("PasswordHash"))
-                    };
-                }
-            }
-            return null;
+            var users = await _idbHelper.ExecuteReaderAsync(query, MapToUser, parameters);
+            return users.SingleOrDefault();
         }
 
         public async Task<bool> CreateUserAsync(User user)
         {
-            await using var connection = await _databaseManager.OpenConnectionAsync();
+            await using var connection = await _idbHelper.OpenConnectionAsync();
             await using var transaction = await connection.BeginTransactionAsync();
 
             try
@@ -65,7 +49,7 @@ namespace MovieVault.Data.Repositories
                     new SqlParameter("@PasswordHash", user.PasswordHash)
                 };
 
-                var userId = await _databaseManager.ExecuteScalarAsync(query, (SqlTransaction)transaction, parameters);
+                var userId = await _idbHelper.ExecuteScalarAsync(query, (SqlTransaction)transaction, parameters);
 
                 if (userId == null)
                     throw new Exception("Échec de la création de l'utilisateur.");
@@ -93,12 +77,12 @@ namespace MovieVault.Data.Repositories
                 new SqlParameter("@PasswordHash", user.PasswordHash)
             };
 
-            return await _databaseManager.ExecuteQueryAsync(query, parameters) > 0;
+            return await _idbHelper.ExecuteQueryAsync(query, parameters) > 0;
         }
 
         public async Task<bool> DeleteUserAsync(int userId)
         {
-            await using var connection = await _databaseManager.OpenConnectionAsync();
+            await using var connection = await _idbHelper.OpenConnectionAsync();
             await using var transaction = await connection.BeginTransactionAsync();
 
             try
@@ -106,7 +90,7 @@ namespace MovieVault.Data.Repositories
                 var query = "DELETE FROM Users WHERE UserId = @UserId";
                 var parameters = new SqlParameter[] { new SqlParameter("@UserId", userId) };
 
-                int rowsAffected = await _databaseManager.ExecuteQueryAsync(query, (SqlTransaction)transaction, parameters);
+                int rowsAffected = await _idbHelper.ExecuteQueryAsync(query, (SqlTransaction)transaction, parameters);
 
                 if (rowsAffected > 0)
                 {
@@ -122,6 +106,17 @@ namespace MovieVault.Data.Repositories
                 await transaction.RollbackAsync();
                 throw new Exception($"Erreur lors de la suppression de l'utilisateur: {ex.Message}");
             }
+        }
+
+        private User MapToUser(IDataReader reader)
+        {
+            return new User
+            {
+                UserId = reader.SafeGet<int>("UserId"),
+                UserName = reader.SafeGet<string>("UserName") ?? string.Empty,
+                Email = reader.SafeGet<string>("Email") ?? string.Empty,
+                PasswordHash = reader.SafeGet<string>("PasswordHash") ?? string.Empty
+            };
         }
     }
 }

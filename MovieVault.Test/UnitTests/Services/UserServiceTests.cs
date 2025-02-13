@@ -21,6 +21,41 @@ namespace MovieVault.Test.UnitTests.Services
         }
 
         [Fact]
+        public async Task GetAllUsersAsync_ShouldReturnListOfUsers_WhenUsersExist()
+        {
+            // Arrange
+            var expectedUsers = new List<User>
+            {
+                new User { UserId = 1, UserName = "TestUser1", Email = "test1@example.com" },
+                new User { UserId = 2, UserName = "TestUser2", Email = "test2@example.com" },
+                new User { UserId = 3, UserName = "TestUser3", Email = "test3@example.com" },
+                new User { UserId = 4, UserName = "TestUser4", Email = "test4@example.com" },
+                new User { UserId = 5, UserName = "TestUser5", Email = "test5@example.com" }
+            };
+            _userRepositoryMock.Setup(repo => repo.GetAllUsersAsync()).ReturnsAsync(expectedUsers);
+
+            // Act
+            var result = await _userService.GetAllUsersAsync();
+
+            // Assert
+            result.Should().BeEquivalentTo(expectedUsers);
+        }
+
+        [Fact]
+        public async Task GetAllUsersAsync_ShouldReturnEmptyList_WhenNoUsersExist()
+        {
+            // Arrange
+            var expectedUsers = new List<User>();
+            _userRepositoryMock.Setup(repo => repo.GetAllUsersAsync()).ReturnsAsync(expectedUsers);
+
+            // Act
+            var result = await _userService.GetAllUsersAsync();
+
+            // Assert
+            result.Should().BeNullOrEmpty();
+        }
+
+        [Fact]
         public async Task GetUserByIdAsync_ShouldReturnUser_WhenUserExists()
         {
             // Arrange

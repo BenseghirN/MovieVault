@@ -1,9 +1,10 @@
 ﻿using Microsoft.Data.SqlClient;
+using System.Data;
 using System.Data.Common;
 
 namespace MovieVault.Data.Interfaces
 {
-    public interface IDatabaseManager
+    public interface IDBHelper
     {
         Task<SqlConnection> OpenConnectionAsync();
         Task CloseConnectionAsync(SqlConnection connection);
@@ -14,7 +15,7 @@ namespace MovieVault.Data.Interfaces
         Task<object?> ExecuteScalarAsync(string query, params SqlParameter[] parameters);
         Task<object?> ExecuteScalarAsync(string query, SqlTransaction transaction, params SqlParameter[] parameters);
 
-        Task<DbDataReader> ExecuteReaderAsync(string query, params SqlParameter[] parameters);
-        Task<DbDataReader> ExecuteReaderAsync(string query, SqlTransaction transaction, params SqlParameter[] parameters);
+        Task<IEnumerable<T>> ExecuteReaderAsync<T>(string query, Func<IDataReader, T> map, params SqlParameter[] parameters);
+        Task<IEnumerable<T>> ExecuteReaderAsync<T>(string query, Func<IDataReader, T> map, SqlTransaction transaction, params SqlParameter[] parameters);
     }
 }

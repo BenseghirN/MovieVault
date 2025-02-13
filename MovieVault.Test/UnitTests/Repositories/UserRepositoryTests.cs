@@ -1,23 +1,22 @@
-﻿using FluentAssertions;
+﻿using System.Data;
+using FluentAssertions;
 using Microsoft.Data.SqlClient;
 using Moq;
 using MovieVault.Data.Interfaces;
 using MovieVault.Data.Models;
 using MovieVault.Data.Repositories;
-using System.Data;
-using MovieVault.Test.Fakes;
 
 namespace MovieVault.Test.UnitTests.Repositories
 {
     public class UserRepositoryTests
     {
-        private readonly Mock<IDatabaseManager> _dbManagerMock;
+        private readonly Mock<IDBHelper> _dbHelperMock;
         private readonly IUserRepository _userRepository;
 
         public UserRepositoryTests()
         {
-            _dbManagerMock = new Mock<IDatabaseManager>();
-            _userRepository = new UserRepository(_dbManagerMock.Object);
+            _dbHelperMock = new Mock<IDBHelper>();
+            _userRepository = new UserRepository(_dbHelperMock.Object);
         }
 
         [Fact]
@@ -25,20 +24,8 @@ namespace MovieVault.Test.UnitTests.Repositories
         {
             var expectedUser = new User { UserId = 1, UserName = "TestUser", Email = "test@example.com", PasswordHash = "hashedpassword" };
 
-            var fakeData = new List<Dictionary<string, object>>
-            {
-                new Dictionary<string, object>
-                {
-                    { "UserId", expectedUser.UserId },
-                    { "UserName", expectedUser.UserName },
-                    { "Email", expectedUser.Email },
-                    { "PasswordHash", expectedUser.PasswordHash }
-                }
-            };
-            var readerMock = new FakeSqlDataReader(fakeData);
-
-            _dbManagerMock.Setup(db => db.ExecuteReaderAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()))
-                .ReturnsAsync(readerMock);
+            _dbHelperMock.Setup(db => db.ExecuteReaderAsync(It.IsAny<string>(), It.IsAny<Func<IDataReader, User>>(), It.IsAny<SqlParameter[]>()))
+                .ReturnsAsync(new List<User> { expectedUser });
 
             var result = await _userRepository.GetUserByIdAsync(1);
 
@@ -48,11 +35,8 @@ namespace MovieVault.Test.UnitTests.Repositories
         [Fact]
         public async Task GetUserByIdAsync_ShouldReturnNull_WhenUserDoesNotExist()
         {
-            var readerMock = new Mock<SqlDataReader>();
-            readerMock.Setup(r => r.Read()).Returns(false);
-
-            _dbManagerMock.Setup(db => db.ExecuteReaderAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()))
-                .ReturnsAsync(readerMock.Object);
+            _dbHelperMock.Setup(db => db.ExecuteReaderAsync(It.IsAny<string>(), It.IsAny<Func<IDataReader, User>>(), It.IsAny<SqlParameter[]>()))
+                .ReturnsAsync(new List<User>());
 
             var result = await _userRepository.GetUserByIdAsync(99);
 
@@ -60,11 +44,42 @@ namespace MovieVault.Test.UnitTests.Repositories
         }
 
         [Fact]
-        public async Task CreateUserAsync_ShouldReturnTrue_WhenUserIsCreated()
+        public async Task GetAllUsersAsync_ShouldReturnListOfUsers_WhenUsersExist()
+        {
+            var expectedUsers = new List<User>
+            {
+                new User { UserId = 1, UserName = "TestUser1", Email = "test1@example.com" },
+                new User { UserId = 2, UserName = "TestUser2", Email = "test2@example.com" },
+                new User { UserId = 3, UserName = "TestUser3", Email = "test3@example.com" },
+                new User { UserId = 4, UserName = "TestUser4", Email = "test4@example.com" },
+                new User { UserId = 5, UserName = "TestUser5", Email = "test5@example.com" }
+            };
+
+            _dbHelperMock.Setup(db => db.ExecuteReaderAsync(It.IsAny<string>(), It.IsAny<Func<IDataReader, User>>(), It.IsAny<SqlParameter[]>()))
+                .ReturnsAsync(expectedUsers);
+
+            var result = await _userRepository.GetAllUsersAsync();
+
+            result.Should().BeEquivalentTo(expectedUsers);
+        }
+
+        [Fact]
+        public async Task GetAllUsersAsync_ShouldReturnEmptyList_WhenNoUsersExist()
+        {
+            _dbHelperMock.Setup(db => db.ExecuteReaderAsync(It.IsAny<string>(), It.IsAny<Func<IDataReader, User>>(), It.IsAny<SqlParameter[]>()))
+                .ReturnsAsync(new List<User>());
+
+            var result = await _userRepository.GetAllUsersAsync();
+
+            result.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task CreateUserAsync_ShouldReturnTrue_WhenUserIsCreatedSuccessfully()
         {
             var newUser = new User { UserName = "NewUser", Email = "new@example.com", PasswordHash = "hashedpassword" };
 
-            _dbManagerMock.Setup(db => db.ExecuteQueryAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()))
+            _dbHelperMock.Setup(db => db.ExecuteScalarAsync(It.IsAny<string>(), It.IsAny<SqlTransaction>(), It.IsAny<SqlParameter[]>()))
                 .ReturnsAsync(1);
 
             var result = await _userRepository.CreateUserAsync(newUser);
@@ -73,9 +88,22 @@ namespace MovieVault.Test.UnitTests.Repositories
         }
 
         [Fact]
+        public async Task CreateUserAsync_ShouldThrowException_WhenInsertFails()
+        {
+            var newUser = new User { UserName = "NewUser", Email = "new@example.com", PasswordHash = "hashedpassword" };
+
+            _dbHelperMock.Setup(db => db.ExecuteScalarAsync(It.IsAny<string>(), It.IsAny<SqlTransaction>(), It.IsAny<SqlParameter[]>()))
+                .ReturnsAsync(null);
+
+            Func<Task> act = async () => await _userRepository.CreateUserAsync(newUser);
+
+            await act.Should().ThrowAsync<Exception>().WithMessage("Échec de la création de l'utilisateur.");
+        }
+
+        [Fact]
         public async Task DeleteUserAsync_ShouldReturnTrue_WhenUserIsDeleted()
         {
-            _dbManagerMock.Setup(db => db.ExecuteQueryAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()))
+            _dbHelperMock.Setup(db => db.ExecuteQueryAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()))
                 .ReturnsAsync(1);
 
             var result = await _userRepository.DeleteUserAsync(1);
@@ -86,7 +114,7 @@ namespace MovieVault.Test.UnitTests.Repositories
         [Fact]
         public async Task DeleteUserAsync_ShouldReturnFalse_WhenUserDoesNotExist()
         {
-            _dbManagerMock.Setup(db => db.ExecuteQueryAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()))
+            _dbHelperMock.Setup(db => db.ExecuteQueryAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()))
                 .ReturnsAsync(0);
 
             var result = await _userRepository.DeleteUserAsync(99);
