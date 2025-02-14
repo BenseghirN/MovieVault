@@ -29,6 +29,7 @@ namespace MovieVault.Test.UnitTests.Repositories
 
             var result = await _userRepository.GetUserByIdAsync(1);
 
+            result.Should().NotBeNull();
             result.Should().BeEquivalentTo(expectedUser);
         }
 
@@ -41,6 +42,20 @@ namespace MovieVault.Test.UnitTests.Repositories
             var result = await _userRepository.GetUserByIdAsync(99);
 
             result.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetUserByEmailAsync_ShouldReturnUser_WhenUserExists()
+        {
+            var expectedUser = new User { UserId = 1, UserName = "TestUser", Email = "test@example.com", PasswordHash = "hashedpassword" };
+
+            _dbHelperMock.Setup(db => db.ExecuteReaderAsync(It.IsAny<string>(), It.IsAny<Func<IDataReader, User>>(), It.IsAny<SqlParameter[]>()))
+                .ReturnsAsync(new List<User> { expectedUser });
+
+            var result = await _userRepository.GetUserByEmailAsync("test@example.com");
+
+            result.Should().NotBeNull();
+            result.Should().BeEquivalentTo(expectedUser);
         }
 
         [Fact]
@@ -61,6 +76,7 @@ namespace MovieVault.Test.UnitTests.Repositories
             var result = await _userRepository.GetAllUsersAsync();
 
             result.Should().BeEquivalentTo(expectedUsers);
+            result.Should().HaveCount(5);
         }
 
         [Fact]
@@ -79,47 +95,55 @@ namespace MovieVault.Test.UnitTests.Repositories
         {
             var newUser = new User { UserName = "NewUser", Email = "new@example.com", PasswordHash = "hashedpassword" };
 
-            _dbHelperMock.Setup(db => db.ExecuteScalarAsync(It.IsAny<string>(), It.IsAny<SqlTransaction>(), It.IsAny<SqlParameter[]>()))
+            _dbHelperMock.Setup(db => db.ExecuteScalarAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()))
                 .ReturnsAsync(1);
 
             var result = await _userRepository.CreateUserAsync(newUser);
 
             result.Should().BeTrue();
+            _dbHelperMock.Verify(db => db.ExecuteScalarAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()), Times.Once);
         }
 
         [Fact]
-        public async Task CreateUserAsync_ShouldThrowException_WhenInsertFails()
+        public async Task UpdateUserAsync_ShouldReturnTrue_WhenUserIsUpdatedSuccessfully()
         {
-            var newUser = new User { UserName = "NewUser", Email = "new@example.com", PasswordHash = "hashedpassword" };
+            var user = new User { UserId = 1, UserName = "updateduser", Email = "updateduser@example.com", PasswordHash = "newpasswordhash" };
 
-            _dbHelperMock.Setup(db => db.ExecuteScalarAsync(It.IsAny<string>(), It.IsAny<SqlTransaction>(), It.IsAny<SqlParameter[]>()))
-                .ReturnsAsync(null);
-
-            Func<Task> act = async () => await _userRepository.CreateUserAsync(newUser);
-
-            await act.Should().ThrowAsync<Exception>().WithMessage("Échec de la création de l'utilisateur.");
-        }
-
-        [Fact]
-        public async Task DeleteUserAsync_ShouldReturnTrue_WhenUserIsDeleted()
-        {
             _dbHelperMock.Setup(db => db.ExecuteQueryAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()))
                 .ReturnsAsync(1);
 
-            var result = await _userRepository.DeleteUserAsync(1);
+            var result = await _userRepository.UpdateUserAsync(user);
 
             result.Should().BeTrue();
+            _dbHelperMock.Verify(db => db.ExecuteQueryAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()), Times.Once);
         }
 
         [Fact]
-        public async Task DeleteUserAsync_ShouldReturnFalse_WhenUserDoesNotExist()
+        public async Task DeleteUserAsync_ShouldReturnTrue_WhenUserIsDeletedSuccessfully()
         {
+            int userId = 1;
+
             _dbHelperMock.Setup(db => db.ExecuteQueryAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()))
-                .ReturnsAsync(0);
+                .ReturnsAsync(1);
 
-            var result = await _userRepository.DeleteUserAsync(99);
+            var result = await _userRepository.DeleteUserAsync(userId);
 
-            result.Should().BeFalse();
+            result.Should().BeTrue();
+            _dbHelperMock.Verify(db => db.ExecuteQueryAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteUserAsync_ShouldThrowException_WhenDeletionFails()
+        {
+            int userId = 1;
+
+            _dbHelperMock.Setup(db => db.ExecuteQueryAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()))
+                .ThrowsAsync(new Exception("SQL Execution Error"));
+
+            Func<Task> act = async () => await _userRepository.DeleteUserAsync(userId);
+
+            await act.Should().ThrowAsync<Exception>()
+                .WithMessage("Erreur lors de la suppression de l'utilisateur: SQL Execution Error");
         }
     }
 }

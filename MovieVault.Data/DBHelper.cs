@@ -1,37 +1,24 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using MovieVault.Data.Interfaces;
-using MovieVault.Data.Utilities;
 using System.Data;
 
 namespace MovieVault.Data
 {
     public class DBHelper : IDBHelper
     {
-        private readonly string _connectionString = DBHelperConfiguration.GetConnectionString();
-        private readonly ILogger<DBHelper> _logger = DBHelperConfiguration.GetLogger<DBHelper>();
+        private readonly IDatabaseConnection _databaseConnection;
+        private readonly ILogger<DBHelper> _logger;
+
+        public DBHelper(IDatabaseConnection databaseConnection, ILogger<DBHelper> logger)
+        {
+            _databaseConnection = databaseConnection ?? throw new ArgumentNullException(nameof(databaseConnection));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
 
         public async Task<SqlConnection> OpenConnectionAsync()
         {
-            if (string.IsNullOrEmpty(_connectionString))
-            {
-                _logger.LogError("Connection string is null or empty.");
-                throw new InvalidOperationException("Database connection string is not set.");
-            }
-
-            try
-            {
-                _logger.LogInformation("Opening SQL Connection...");
-                var connection = new SqlConnection(_connectionString);
-                await connection.OpenAsync();
-                _logger.LogInformation("SQL Connection Opened");
-                return connection;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error opening SQL connection: {errorMessage}", ex.Message);
-                throw;
-            }
+            return await _databaseConnection.OpenConnectionAsync();
         }
 
         public async Task CloseConnectionAsync(SqlConnection connection)
@@ -43,36 +30,35 @@ namespace MovieVault.Data
             }
         }
 
+        public async Task<SqlTransaction> BeginTransactionAsync(SqlConnection connection)
+        {
+            if (connection == null || connection.State != ConnectionState.Open)
+                throw new InvalidOperationException("Cannot start a transaction on a closed connection.");
+
+            _logger.LogInformation("Starting SQL Transaction...");
+            return await _databaseConnection.BeginTransactionAsync(connection);
+        }
+
         // For SQL `INSERT`, `UPDATE`, `DELETE`
         public async Task<int> ExecuteQueryAsync(string query, params SqlParameter[] parameters)
         {
-            try
-            {
-                await using var connection = await OpenConnectionAsync();
-                await using var command = new SqlCommand(query, connection);
-
-                if (parameters != null)
-                    command.Parameters.AddRange(parameters);
-
-                _logger.LogInformation("Executing Query: {query}", query);
-
-                int result = await command.ExecuteNonQueryAsync();
-                _logger.LogInformation("Query executed successfully, affected rows: {nbRows}", result);
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "SQL Execution Error: {errorMessage}", ex.Message);
-                throw;
-            }
+            return await ExecuteQueryWithTransactionAsync(query, null, parameters);
         }
 
         public async Task<int> ExecuteQueryAsync(string query, SqlTransaction transaction, params SqlParameter[] parameters)
         {
+            return await ExecuteQueryWithTransactionAsync(query, transaction, parameters);
+        }
+
+        private async Task<int> ExecuteQueryWithTransactionAsync(string query, SqlTransaction transaction, params SqlParameter[] parameters)
+        {
+            await using var connection = transaction?.Connection ?? await OpenConnectionAsync();
+
+            SqlTransaction localTransaction = transaction ?? (SqlTransaction)await connection.BeginTransactionAsync();
+
             try
             {
-                await using var command = new SqlCommand(query, transaction.Connection, transaction);
+                await using var command = new SqlCommand(query, connection, localTransaction);
 
                 if (parameters != null)
                     command.Parameters.AddRange(parameters);
@@ -82,10 +68,16 @@ namespace MovieVault.Data
                 int result = await command.ExecuteNonQueryAsync();
                 _logger.LogInformation("Query executed successfully in transaction, affected rows: {result}", result);
 
+                if (transaction == null)
+                    await localTransaction.CommitAsync();
+
                 return result;
             }
             catch (Exception ex)
             {
+                if (transaction == null)
+                    await localTransaction.RollbackAsync();
+
                 _logger.LogError(ex, "SQL Execution Error in Transaction: {errorMessage}", ex.Message);
                 throw;
             }
@@ -94,42 +86,25 @@ namespace MovieVault.Data
         // For SQL `SELECT`
         public async Task<IEnumerable<T>> ExecuteReaderAsync<T>(string query, Func<IDataReader, T> map, params SqlParameter[] parameters)
         {
-            var results = new List<T>();
-
-            try
-            {
-                await using var connection = new SqlConnection(_connectionString);
-                await using var command = new SqlCommand(query, connection);
-
-                if (parameters != null)
-                    command.Parameters.AddRange(parameters);
-
-                _logger.LogInformation("Executing Reader Query: {Query}", query);
-
-                await connection.OpenAsync();
-                await using var reader = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
-
-                while (await reader.ReadAsync())
-                {
-                    results.Add(map(reader)); // Map the data to the object
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "SQL Reader Execution Error: {errorMessage}", ex.Message);
-                throw;
-            }
-
-            return results;
+            return await ExecuteReaderWithTransactionAsync(query, map, null, parameters);
         }
 
         public async Task<IEnumerable<T>> ExecuteReaderAsync<T>(string query, Func<IDataReader, T> map, SqlTransaction transaction, params SqlParameter[] parameters)
         {
+            return await ExecuteReaderWithTransactionAsync(query, map, transaction, parameters);
+        }
+
+        private async Task<IEnumerable<T>> ExecuteReaderWithTransactionAsync<T>(string query, Func<IDataReader, T> map, SqlTransaction transaction, params SqlParameter[] parameters)
+        {
             var results = new List<T>();
+
+            await using var connection = transaction?.Connection ?? await OpenConnectionAsync();
+
+            SqlTransaction localTransaction = transaction ?? (SqlTransaction)await connection.BeginTransactionAsync();
 
             try
             {
-                await using var command = new SqlCommand(query, transaction.Connection, transaction);
+                await using var command = new SqlCommand(query, connection, localTransaction);
 
                 if (parameters != null)
                     command.Parameters.AddRange(parameters);
@@ -141,9 +116,15 @@ namespace MovieVault.Data
                 {
                     results.Add(map(reader));
                 }
+
+                if (transaction == null)
+                    await localTransaction.CommitAsync();
             }
             catch (Exception ex)
             {
+                if (transaction == null)
+                    await localTransaction.RollbackAsync();
+
                 _logger.LogError(ex, "SQL Reader Execution Error in Transaction: {errorMessage}", ex.Message);
                 throw;
             }
@@ -151,33 +132,26 @@ namespace MovieVault.Data
             return results;
         }
 
+        // For SQL `Scalar`
         public async Task<object?> ExecuteScalarAsync(string query, params SqlParameter[] parameters)
         {
-            try
-            {
-                await using var connection = await OpenConnectionAsync();
-                await using var command = new SqlCommand(query, connection);
-
-                if (parameters != null)
-                    command.Parameters.AddRange(parameters);
-
-                _logger.LogInformation("Executing Scalar Query: {query}", query);
-
-                var result = await command.ExecuteScalarAsync();
-                return result != DBNull.Value ? result : null; // Return null if DBNull from SQL
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "SQL Scalar Execution Error: {errorMessage}", ex.Message);
-                throw;
-            }
+            return await ExecuteScalarWithTransactionAsync(query, null, parameters);
         }
 
         public async Task<object?> ExecuteScalarAsync(string query, SqlTransaction transaction, params SqlParameter[] parameters)
         {
+            return await ExecuteScalarWithTransactionAsync(query, transaction, parameters);
+        }
+
+        private async Task<object?> ExecuteScalarWithTransactionAsync(string query, SqlTransaction transaction, params SqlParameter[] parameters)
+        {
+            await using var connection = transaction?.Connection ?? await OpenConnectionAsync();
+
+            SqlTransaction localTransaction = transaction ?? (SqlTransaction)await connection.BeginTransactionAsync();
+
             try
             {
-                await using var command = new SqlCommand(query, transaction.Connection, transaction);
+                await using var command = new SqlCommand(query, connection, localTransaction);
 
                 if (parameters != null)
                     command.Parameters.AddRange(parameters);
@@ -185,10 +159,17 @@ namespace MovieVault.Data
                 _logger.LogInformation("Executing Scalar Query with Transaction: {query}", query);
 
                 var result = await command.ExecuteScalarAsync();
+
+                if (transaction == null)
+                    await localTransaction.CommitAsync();
+
                 return result != DBNull.Value ? result : null;
             }
             catch (Exception ex)
             {
+                if (transaction == null)
+                    await localTransaction.RollbackAsync();
+
                 _logger.LogError(ex, "SQL Scalar Execution Error in Transaction: {errorMessage}", ex.Message);
                 throw;
             }
