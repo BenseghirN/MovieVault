@@ -55,7 +55,7 @@ namespace MovieVault.Core.Services
             return user;
         }
 
-        public async Task<bool> RegisterUserAsync(string userName, string email, string password)
+        public async Task<int> RegisterUserAsync(string userName, string email, string password)
         {
             _logger.LogInformation("Registering new user: {email}", email);
 
@@ -70,9 +70,9 @@ namespace MovieVault.Core.Services
 
             string hashedPassword = PasswordHasher.HashPassword(password);
             var user = new User { UserName = userName, Email = email, PasswordHash = hashedPassword };
-            bool result = await _userRepository.CreateUserAsync(user);
+            var result = await _userRepository.CreateUserAsync(user);
 
-            if (result)
+            if (result > 0)
                 _logger.LogInformation("User registered successfully: {email}", email);
             else
                 _logger.LogError("Failed to register user: {email}", email);
