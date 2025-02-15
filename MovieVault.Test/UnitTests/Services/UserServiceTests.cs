@@ -96,13 +96,13 @@ namespace MovieVault.Test.UnitTests.Services
         {
             // Arrange
             _userRepositoryMock.Setup(repo => repo.GetUserByEmailAsync("new@example.com")).ReturnsAsync((User)null);
-            _userRepositoryMock.Setup(repo => repo.CreateUserAsync(It.IsAny<User>())).ReturnsAsync(true);
+            _userRepositoryMock.Setup(repo => repo.CreateUserAsync(It.IsAny<User>())).ReturnsAsync(1);
 
             // Act
             var result = await _userService.RegisterUserAsync("NewUser", "new@example.com", "Password123");
 
             // Assert
-            result.Should().BeTrue();
+            result.Should().Be(1);
         }
 
         [Fact]

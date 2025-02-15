@@ -94,13 +94,14 @@ namespace MovieVault.Test.UnitTests.Repositories
         public async Task CreateUserAsync_ShouldReturnTrue_WhenUserIsCreatedSuccessfully()
         {
             var newUser = new User { UserName = "NewUser", Email = "new@example.com", PasswordHash = "hashedpassword" };
+            var expectedUserid = 1;
 
             _dbHelperMock.Setup(db => db.ExecuteScalarAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()))
                 .ReturnsAsync(1);
 
             var result = await _userRepository.CreateUserAsync(newUser);
 
-            result.Should().BeTrue();
+            result.Should().Be(expectedUserid);
             _dbHelperMock.Verify(db => db.ExecuteScalarAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()), Times.Once);
         }
 
@@ -133,17 +134,29 @@ namespace MovieVault.Test.UnitTests.Repositories
         }
 
         [Fact]
-        public async Task DeleteUserAsync_ShouldThrowException_WhenDeletionFails()
+        public async Task DeleteUserAsync_ShouldReturnTrue_WhenDeletionIsSuccessful()
         {
             int userId = 1;
 
             _dbHelperMock.Setup(db => db.ExecuteQueryAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()))
-                .ThrowsAsync(new Exception("SQL Execution Error"));
+                .ReturnsAsync(1);
 
-            Func<Task> act = async () => await _userRepository.DeleteUserAsync(userId);
+            var result = await _userRepository.DeleteUserAsync(userId);
 
-            await act.Should().ThrowAsync<Exception>()
-                .WithMessage("Erreur lors de la suppression de l'utilisateur: SQL Execution Error");
+            result.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task DeleteUserAsync_ShouldReturnFalse_WhenNoRowsAffected()
+        {
+            int userId = 1;
+
+            _dbHelperMock.Setup(db => db.ExecuteQueryAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()))
+                .ReturnsAsync(0);
+
+            var result = await _userRepository.DeleteUserAsync(userId);
+
+            result.Should().BeFalse();
         }
     }
 }

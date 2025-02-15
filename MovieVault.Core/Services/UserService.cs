@@ -130,6 +130,12 @@ namespace MovieVault.Core.Services
                 return false;
             }
 
+            if (user.PasswordHash == null)
+            {
+                _logger.LogWarning("Password hash is null for user: {email}", email);
+                return false;
+            }
+
             bool isValid = PasswordHasher.VerifyPassword(password, user.PasswordHash);
             if (isValid)
                 _logger.LogInformation("Password validation successful for user: {email}", email);
