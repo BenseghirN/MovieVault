@@ -1,6 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
-using System.Data.Common;
 
 namespace MovieVault.Data.Interfaces
 {

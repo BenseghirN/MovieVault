@@ -1,5 +1,5 @@
-using System.Data;
 using MovieVault.Core.Interfaces;
+using System.Data;
 
 namespace MovieVault.UI
 {

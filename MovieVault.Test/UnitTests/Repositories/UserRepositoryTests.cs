@@ -1,10 +1,10 @@
-﻿using System.Data;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.Data.SqlClient;
 using Moq;
 using MovieVault.Data.Interfaces;
 using MovieVault.Data.Models;
 using MovieVault.Data.Repositories;
+using System.Data;
 
 namespace MovieVault.Test.UnitTests.Repositories
 {
