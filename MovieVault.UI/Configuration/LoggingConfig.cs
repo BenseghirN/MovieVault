@@ -1,15 +1,15 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Serilog;
 
-namespace MovieVault.Core.Utilities
+namespace MovieVault.UI.Configuration
 {
     public static class LoggingConfig
     {
-        private static ILoggerFactory _loggerFactory;
+        private static readonly ILoggerFactory _loggerFactory;
 
         static LoggingConfig()
         {
-            var logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MovieVault", "logs", "application.log");
+            var logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MovieVault", "logs", "UI.log");
             Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
 
             Log.Logger = new LoggerConfiguration()
@@ -22,6 +22,11 @@ namespace MovieVault.Core.Utilities
         public static ILogger<T> GetLogger<T>()
         {
             return _loggerFactory.CreateLogger<T>();
+        }
+
+        public static ILoggerFactory GetLoggerFactory()
+        {
+            return _loggerFactory;
         }
     }
 }

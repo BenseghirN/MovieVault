@@ -1,6 +1,7 @@
 using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
+using MovieVault.Data.Configuration;
 using MovieVault.Data.Interfaces;
 
 namespace MovieVault.Data.Utilities

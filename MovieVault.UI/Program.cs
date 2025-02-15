@@ -1,3 +1,7 @@
+using Microsoft.Extensions.DependencyInjection;
+using MovieVault.Core.Interfaces;
+using MovieVault.UI.Configuration;
+
 namespace MovieVault.UI
 {
     internal static class Program
@@ -10,8 +14,10 @@ namespace MovieVault.UI
         {
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
+            var serviceProvider = DependencyInjection.ConfigureServices();
+
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+            Application.Run(new Form1(serviceProvider.GetRequiredService<IUserService>()));
         }
     }
 }

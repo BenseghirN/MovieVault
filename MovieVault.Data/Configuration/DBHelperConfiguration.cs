@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Serilog;
 
-namespace MovieVault.Data.Utilities
+namespace MovieVault.Data.Configuration
 {
     public class DBHelperConfiguration
     {

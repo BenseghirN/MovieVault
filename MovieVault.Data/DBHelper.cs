@@ -117,6 +117,8 @@ namespace MovieVault.Data
                     results.Add(map(reader));
                 }
 
+                await reader.CloseAsync();
+
                 if (transaction == null)
                     await localTransaction.CommitAsync();
             }
@@ -128,7 +130,11 @@ namespace MovieVault.Data
                 _logger.LogError(ex, "SQL Reader Execution Error in Transaction: {errorMessage}", ex.Message);
                 throw;
             }
-
+            finally
+            {
+                if (transaction == null)
+                    await connection.CloseAsync();
+            }
             return results;
         }
 
@@ -172,6 +178,11 @@ namespace MovieVault.Data
 
                 _logger.LogError(ex, "SQL Scalar Execution Error in Transaction: {errorMessage}", ex.Message);
                 throw;
+            }
+            finally
+            {
+                if (transaction == null)
+                    await connection.CloseAsync();
             }
         }
 
