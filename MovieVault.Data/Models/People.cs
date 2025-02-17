@@ -8,6 +8,7 @@ public class People
     public DateTime? BirthDate { get; set; }
     public string? Nationality { get; set; }
     public string? PhotoUrl { get; set; }
+    public int? TMDBId { get; set; }
 
     public HashSet<MoviesPeople> MoviesPeople { get; set; } = new();
 }

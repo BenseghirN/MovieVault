@@ -25,25 +25,29 @@ CREATE TABLE Movies (
     ReleaseYear INT CHECK (ReleaseYear >= 1888),
     Duration INT CHECK (Duration > 0),
     Synopsis TEXT NULL,
-    PosterUrl NVARCHAR(255) NULL -- Ajout de l'affiche du film
+    PosterUrl NVARCHAR(255) NULL, -- Ajout de l'affiche du film
+    TMDBId INT UNIQUE NULL
+    -- CONSTRAINT UQ_Movies_Title_ReleaseYear UNIQUE (Title, ReleaseYear)
 );
 GO
 
--- Table People (Remplace Actors)
+-- Table People
 CREATE TABLE People (
     PersonId INT IDENTITY(1,1) PRIMARY KEY,
     FirstName NVARCHAR(100) NOT NULL,
     LastName NVARCHAR(100) NOT NULL,
     BirthDate DATE NULL,
     Nationality NVARCHAR(100) NULL,
-    PhotoUrl NVARCHAR(255) NULL
+    PhotoUrl NVARCHAR(255) NULL,
+    TMDBId INT UNIQUE NULL
 );
 GO
 
 -- Table Genres
 CREATE TABLE Genres (
     GenreId INT IDENTITY(1,1) PRIMARY KEY,
-    GenreName NVARCHAR(50) NOT NULL UNIQUE
+    GenreName NVARCHAR(50) NOT NULL UNIQUE,
+    TMDBId INT UNIQUE NULL
 );
 GO
 
@@ -57,11 +61,11 @@ CREATE TABLE MoviesGenres (
 );
 GO
 
--- Table MoviesPeople (Remplace MoviesActors) avec RoleId en INT
+-- Table MoviesPeople
 CREATE TABLE MoviesPeople (
     MovieId INT NOT NULL,
     PersonId INT NOT NULL,
-    Role TINYINT NOT NULL, -- Plus de table Roles, juste un INT
+    Role TINYINT NOT NULL,
     PRIMARY KEY (MovieId, PersonId, Role),
     FOREIGN KEY (MovieId) REFERENCES Movies(MovieId) ON DELETE CASCADE,
     FOREIGN KEY (PersonId) REFERENCES People(PersonId) ON DELETE CASCADE

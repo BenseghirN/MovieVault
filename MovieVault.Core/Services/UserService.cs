@@ -54,52 +54,50 @@ namespace MovieVault.Core.Services
             return user;
         }
 
-        public async Task<int> RegisterUserAsync(string userName, string email, string password)
+        public async Task<int> RegisterUserAsync(User user, string password)
         {
-            _logger.LogInformation("Registering new user: {email}", email);
+            _logger.LogInformation("Registering new user: {email}", user.Email);
 
-            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(user.UserName) || string.IsNullOrWhiteSpace(user.Email) || string.IsNullOrWhiteSpace(password))
                 throw new ArgumentException("Les informations ne peuvent pas être vides.");
 
-            if (await _userRepository.GetUserByEmailAsync(email) != null)
+            if (await _userRepository.GetUserByEmailAsync(user.Email) != null)
             {
-                _logger.LogWarning($"Email already in use: {email}");
+                _logger.LogWarning($"Email already in use: {user.Email}");
                 throw new InvalidOperationException("Cet email est déjà utilisé.");
             }
 
-            string hashedPassword = PasswordHasher.HashPassword(password);
-            var user = new User { UserName = userName, Email = email, PasswordHash = hashedPassword };
+            user.PasswordHash = PasswordHasher.HashPassword(password);
             var result = await _userRepository.CreateUserAsync(user);
 
             if (result > 0)
-                _logger.LogInformation("User registered successfully: {email}", email);
+                _logger.LogInformation("User registered successfully: {email}", user.Email);
             else
-                _logger.LogError("Failed to register user: {email}", email);
+                _logger.LogError("Failed to register user: {email}", user.Email);
 
             return result;
         }
 
-        public async Task<bool> UpdateUserAsync(int userId, string userName, string email, string password)
+        public async Task<bool> UpdateUserAsync(User updatedUser)
         {
-            _logger.LogInformation("Updating user ID: {userId}", userId);
+            _logger.LogInformation("Updating user ID: {userId}", updatedUser.UserId);
 
-            var existingUser = await _userRepository.GetUserByIdAsync(userId);
+            var existingUser = await _userRepository.GetUserByIdAsync(updatedUser.UserId);
             if (existingUser == null)
             {
-                _logger.LogWarning("User not found: {userId}", userId);
+                _logger.LogWarning("User not found: {userId}", updatedUser.UserId);
                 throw new InvalidOperationException("Utilisateur non trouvé.");
             }
 
-            existingUser.UserName = userName;
-            existingUser.Email = email;
-            existingUser.PasswordHash = PasswordHasher.HashPassword(password);
+            existingUser.UserName = updatedUser.UserName;
+            existingUser.Email = updatedUser.Email;
 
             bool result = await _userRepository.UpdateUserAsync(existingUser);
 
             if (result)
-                _logger.LogInformation("User updated successfully: {userId}", userId);
+                _logger.LogInformation("User updated successfully: {userId}", updatedUser.UserId);
             else
-                _logger.LogError("Failed to update user: {userId}", userId);
+                _logger.LogError("Failed to update user: {userId}", updatedUser.UserId);
 
             return result;
         }

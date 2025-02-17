@@ -17,8 +17,9 @@ namespace MovieVault.Data.Configuration
             services.AddSingleton(configuration);
             services.AddSingleton(loggerFactory);
             services.AddSingleton<IDatabaseConnection>(sp => new DatabaseConnection(sp.GetRequiredService<ILogger<DatabaseConnection>>()));
-            services.AddSingleton<IDBHelper>(sp => new DBHelper(sp.GetRequiredService<IDatabaseConnection>(), sp.GetRequiredService<ILogger<DBHelper>>()));
+            services.AddSingleton<IDBHelper, DBHelper>();
             services.AddSingleton<IUserRepository, UserRepository>();
+            services.AddSingleton<IMovieRepository, MovieRepository>();
             services.AddLogging();
         }
     }

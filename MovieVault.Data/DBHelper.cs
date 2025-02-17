@@ -54,7 +54,7 @@ namespace MovieVault.Data
         {
             await using var connection = transaction?.Connection ?? await OpenConnectionAsync();
 
-            SqlTransaction localTransaction = transaction ?? (SqlTransaction)await connection.BeginTransactionAsync();
+            SqlTransaction localTransaction = transaction ?? await BeginTransactionAsync(connection);
 
             try
             {
@@ -100,7 +100,7 @@ namespace MovieVault.Data
 
             await using var connection = transaction?.Connection ?? await OpenConnectionAsync();
 
-            SqlTransaction localTransaction = transaction ?? (SqlTransaction)await connection.BeginTransactionAsync();
+            SqlTransaction localTransaction = transaction ?? await BeginTransactionAsync(connection);
 
             try
             {

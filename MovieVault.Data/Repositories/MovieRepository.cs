@@ -10,35 +10,55 @@ namespace MovieVault.Data.Repositories
     {
         private readonly IDBHelper _idbHelper = iDbHelper ?? throw new ArgumentNullException(nameof(iDbHelper));
 
-        public async Task<int> CreateMovieAsync(Movie movie)
+        public async Task<int> CreateMovieAsync(Movie movie, SqlTransaction? transaction = null)
         {
-            var query = "INSERT INTO Movies (Title, ReleaseYear, Duration, Synopsis, PosterUrl) OUTPUT INSERTED.MovieId VALUES (@Title, @ReleaseYear, @Duration, @Synopsis, @PosterUrl)";
-            var parameters = new SqlParameter[]
+            if (await MovieExistsAsync(movie)) return 0; // Movie already exists
+
+            var query = @"INSERT INTO Movies (Title, ReleaseYear, Duration, TMDBId, Synopsis, PosterUrl) OUTPUT INSERTED.MovieId VALUES (@Title, @ReleaseYear, @Duration, @TMDBId, @Synopsis, @PosterUrl)";
+
+            var movieParams = new SqlParameter[]
             {
                 new SqlParameter("@Title", movie.Title),
                 new SqlParameter("@ReleaseYear", movie.ReleaseYear),
                 new SqlParameter("@Duration", movie.Duration),
-                new SqlParameter("@Synopsis", movie.Synopsis),
-                new SqlParameter("@PosterUrl", movie.PosterUrl)
+                new SqlParameter("@TMDBId", (object?)movie.TMDBId ?? DBNull.Value),
+                new SqlParameter("@Synopsis", (object?)movie.Synopsis ?? DBNull.Value),
+                new SqlParameter("@PosterUrl", (object?)movie.PosterUrl ?? DBNull.Value)
             };
 
-            var movieId = await _idbHelper.ExecuteScalarAsync(query, parameters);
+            var movieId = await _idbHelper.ExecuteScalarAsync(query, transaction, movieParams);
 
-            return movieId != null ? (int)movieId : 0;
+            return movieId == null ? 0 : (int)movieId;
         }
 
-        public async Task<bool> DeleteMovieAsync(int movieId)
+        public async Task<bool> DeleteMovieAsync(int movieId, SqlTransaction? transaction = null)
         {
-            var query = "DELETE FROM Movies WHERE MovieId = @MovieId";
-            var parameters = new SqlParameter[] { new SqlParameter("@MovieId", movieId) };
+            var checkUserQuery = "SELECT COUNT(*) FROM UserMovies WHERE MovieId = @MovieId";
+            var userCount = (int?)await _idbHelper.ExecuteScalarAsync(checkUserQuery, transaction, new SqlParameter("@MovieId", movieId)) ?? 0;
+            if (userCount > 0)
+            {
+                return false; // Can't delete, movie is liked to User
+            }
 
-            int rowsAffected = await _idbHelper.ExecuteQueryAsync(query, parameters);
+            // Deleting relations
+            await _idbHelper.ExecuteQueryAsync("DELETE FROM MoviesGenres WHERE MovieId = @MovieId", transaction, new SqlParameter("@MovieId", movieId));
+            await _idbHelper.ExecuteQueryAsync("DELETE FROM MoviesPeople WHERE MovieId = @MovieId", transaction, new SqlParameter("@MovieId", movieId));
+
+            // Deleting the movie
+            var query = "DELETE FROM Movies WHERE MovieId = @MovieId";
+            int rowsAffected = await _idbHelper.ExecuteQueryAsync(query, transaction, new SqlParameter("@MovieId", movieId));
+
             return rowsAffected > 0;
         }
 
-        public async Task<IEnumerable<Movie>> GetAllMoviesAsync()
+        public async Task<IEnumerable<Movie>> GetAllMoviesAsync(int offset, int limit)
         {
-            var query = "SELECT * FROM Movies";
+            var query = @"SELECT * FROM Movies ORDER BY MovieId OFFSET @Offset ROWS FETCH NEXT @Limit ROWS ONLY";
+            var parameters = new SqlParameter[]
+            {
+                new SqlParameter("@Offset", offset),
+                new SqlParameter("@Limit", limit)
+            };
             return await _idbHelper.ExecuteReaderAsync(query, MapToMovie);
         }
 
@@ -67,13 +87,13 @@ namespace MovieVault.Data.Repositories
             return await _idbHelper.ExecuteReaderAsync(query, MapToMovie, parameters);
         }
 
-        public async Task<IEnumerable<Movie>> SearchMoviesAsync(string? title, IEnumerable<int>? years, string? genre, IEnumerable<string>? directors, IEnumerable<string>? actors)
+        public async Task<IEnumerable<Movie>> SearchMoviesAsync(string? title, IEnumerable<int>? years, IEnumerable<string>? genres, IEnumerable<string>? directors, IEnumerable<string>? actors)
         {
             var query = "SELECT DISTINCT m.* FROM Movies m ";
             var parameters = new List<SqlParameter>();
 
-            var joins = QueryBuilder.BuildJoins(genre, directors, actors);
-            var conditions = QueryBuilder.BuildConditions(title, years, genre, directors, actors, parameters);
+            var joins = QueryBuilder.BuildJoins(genres, directors, actors);
+            var conditions = QueryBuilder.BuildConditions(title, years, genres, directors, actors, parameters);
 
             if (joins.Any())
                 query += string.Join(" ", joins);
@@ -86,7 +106,7 @@ namespace MovieVault.Data.Repositories
 
         public async Task<bool> UpdateMovieAsync(Movie movie)
         {
-            var query = "UPDATE Movies SET Title = @Title, ReleaseYear = @ReleaseYear, Duration = @Duration, Synopsis = @Synopsis, PosterUrl = @PosterUrl WHERE MovieId = @MovieId";
+            var query = "UPDATE Movies SET Title = @Title, ReleaseYear = @ReleaseYear, Duration = @Duration, Synopsis = @Synopsis, PosterUrl = @PosterUrl, TMDBId = @TMDBId WHERE MovieId = @MovieId";
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@MovieId", movie.MovieId),
@@ -94,11 +114,49 @@ namespace MovieVault.Data.Repositories
                 new SqlParameter("@ReleaseYear", movie.ReleaseYear),
                 new SqlParameter("@Duration", movie.Duration),
                 new SqlParameter("@Synopsis", movie.Synopsis),
-                new SqlParameter("@PosterUrl", movie.PosterUrl)
+                new SqlParameter("@PosterUrl", movie.PosterUrl),
+                new SqlParameter("@TMDBId", movie.TMDBId)
             };
 
             int rowsAffected = await _idbHelper.ExecuteQueryAsync(query, parameters);
             return rowsAffected > 0;
+        }
+
+        public async Task<bool> MovieExistsAsync(Movie movie, SqlTransaction? transaction = null)
+        {
+            if (movie.TMDBId.HasValue)
+            {
+                var queryTMDB = "SELECT COUNT(*) FROM Movies WHERE TMDBId = @TMDBId";
+                var countTMDB = (int?)await _idbHelper.ExecuteScalarAsync(queryTMDB, new SqlParameter("@TMDBId", movie.TMDBId.Value)) ?? 0;
+                if (countTMDB > 0)
+                    return true;
+            }
+
+            var query = @"
+                    SELECT COUNT(*) 
+                    FROM Movies m
+                    JOIN MoviesPeople mp ON m.MovieId = mp.MovieId
+                    JOIN People p ON mp.PersonId = p.PersonId
+                    WHERE m.Title = @Title 
+                    AND m.ReleaseYear = @ReleaseYear
+                    AND p.FirstName = @DirectorFirstName
+                    AND p.LastName = @DirectorLastName
+                    AND mp.Role = 1";
+
+            var director = movie.MoviesPeople.FirstOrDefault(p => p.Role == 1)?.Person;
+
+            if (director == null) return false;
+
+            var parameters = new SqlParameter[]
+            {
+                new SqlParameter("@Title", movie.Title),
+                new SqlParameter("@ReleaseYear", movie.ReleaseYear),
+                new SqlParameter("@DirectorFirstName", director?.FirstName),
+                new SqlParameter("@DirectorLastName", director?.LastName)
+            };
+
+            var count = (int?)await _idbHelper.ExecuteScalarAsync(query, transaction, parameters) ?? 0;
+            return count > 0;
         }
 
         private Movie MapToMovie(IDataReader reader)
@@ -108,7 +166,8 @@ namespace MovieVault.Data.Repositories
                 MovieId = reader.SafeGet<int>("MovieId"),
                 Title = reader.SafeGet<string>("Title"),
                 ReleaseYear = reader.SafeGet<int>("ReleaseYear"),
-                Duration = reader.SafeGet<int>("Duration")
+                Duration = reader.SafeGet<int>("Duration"),
+                TMDBId = reader.SafeGet<int>("TMDBId"),
             };
         }
     }

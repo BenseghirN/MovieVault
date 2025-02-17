@@ -86,20 +86,23 @@ namespace MovieVault.Test.UnitTests.Services
             var existingUser = new User { UserId = 1, UserName = "ExistingUser", Email = "exists@example.com" };
             _userRepositoryMock.Setup(repo => repo.GetUserByEmailAsync("exists@example.com")).ReturnsAsync(existingUser);
 
+            var newUser = new User { UserName = "NewUser", Email = "exists@example.com" };
+
             // Act & Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _userService.RegisterUserAsync("NewUser", "exists@example.com", "Password123"));
+                _userService.RegisterUserAsync(newUser, "Password123"));
         }
 
         [Fact]
         public async Task RegisterUserAsync_ShouldReturnCreatesUserSuccessfully_WhenValidUser()
         {
             // Arrange
+            var newUser = new User { UserName = "NewUser", Email = "new@example.com" };
             _userRepositoryMock.Setup(repo => repo.GetUserByEmailAsync("new@example.com")).ReturnsAsync((User)null);
             _userRepositoryMock.Setup(repo => repo.CreateUserAsync(It.IsAny<User>())).ReturnsAsync(1);
 
             // Act
-            var result = await _userService.RegisterUserAsync("NewUser", "new@example.com", "Password123");
+            var result = await _userService.RegisterUserAsync(newUser, "Password123");
 
             // Assert
             result.Should().Be(1);
@@ -129,6 +132,32 @@ namespace MovieVault.Test.UnitTests.Services
 
             // Assert
             result.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldReturnTrue_WhenUserExists()
+        {
+            // Arrange
+            var updatedUser = new User { UserId = 1, UserName = "UpdatedUser", Email = "updated@example.com" };
+            _userRepositoryMock.Setup(repo => repo.GetUserByIdAsync(1)).ReturnsAsync(updatedUser);
+            _userRepositoryMock.Setup(repo => repo.UpdateUserAsync(It.IsAny<User>())).ReturnsAsync(true);
+
+            // Act
+            var result = await _userService.UpdateUserAsync(updatedUser);
+
+            // Assert
+            result.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldThrowInvalidOperationException_WhenUserDoesNotExist()
+        {
+            // Arrange
+            var updatedUser = new User { UserId = 99, UserName = "NonExistentUser", Email = "nonexistent@example.com" };
+            _userRepositoryMock.Setup(repo => repo.GetUserByIdAsync(99)).ReturnsAsync((User)null);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _userService.UpdateUserAsync(updatedUser));
         }
     }
 }

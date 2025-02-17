@@ -22,7 +22,7 @@ namespace MovieVault.Test.UnitTests.Repositories
         [Fact]
         public async Task CreateMovieAsync_ShouldReturnMovieId_WhenMovieIsCreated()
         {
-            _dbHelperMock.Setup(db => db.ExecuteScalarAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()))
+            _dbHelperMock.Setup(db => db.ExecuteScalarAsync(It.IsAny<string>(), It.IsAny<SqlTransaction?>(), It.IsAny<SqlParameter[]>()))
                 .ReturnsAsync(5);
 
             var newMovie = new Movie { Title = "New Movie", ReleaseYear = 2024, Duration = 120 };
@@ -60,11 +60,30 @@ namespace MovieVault.Test.UnitTests.Repositories
         [Fact]
         public async Task DeleteMovieAsync_ShouldReturnTrue_WhenMovieIsDeleted()
         {
-            _dbHelperMock.Setup(db => db.ExecuteQueryAsync(It.IsAny<string>(), It.IsAny<SqlParameter[]>()))
+            // Setup mock for ExecuteScalarAsync to return 0 (no user likes the movie)
+            _dbHelperMock.Setup(db => db.ExecuteScalarAsync(It.Is<string>(s => s.Contains("SELECT COUNT(*) FROM UserMovies")),
+                    It.IsAny<SqlTransaction>(),
+                    It.IsAny<SqlParameter[]>()))
+                .ReturnsAsync((object)0);
+
+            // Setup mock for ExecuteQueryAsync to delete movie relations and movie itself
+            _dbHelperMock.Setup(db => db.ExecuteQueryAsync(It.Is<string>(s => s.Contains("DELETE FROM MoviesGenres")),
+                    It.IsAny<SqlTransaction>(),
+                    It.IsAny<SqlParameter[]>()))
+                .ReturnsAsync(1);
+            _dbHelperMock.Setup(db => db.ExecuteQueryAsync(It.Is<string>(s => s.Contains("DELETE FROM MoviesPeople")),
+                    It.IsAny<SqlTransaction>(),
+                    It.IsAny<SqlParameter[]>()))
+                .ReturnsAsync(1);
+            _dbHelperMock.Setup(db => db.ExecuteQueryAsync(It.Is<string>(s => s.Contains("DELETE FROM Movies WHERE MovieId")),
+                    It.IsAny<SqlTransaction>(),
+                    It.IsAny<SqlParameter[]>()))
                 .ReturnsAsync(1);
 
+            // Act
             var result = await _movieRepository.DeleteMovieAsync(1);
 
+            // Assert
             result.Should().BeTrue();
         }
 

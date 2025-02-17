@@ -68,8 +68,8 @@ namespace MovieVault.Test.UnitTests.Repositories
 
             _dbHelperMock.Setup(db => db.ExecuteReaderAsync(It.IsAny<string>(), It.IsAny<Func<IDataReader, Movie>>(), It.IsAny<SqlParameter[]>()))
                 .ReturnsAsync(expectedMovies);
-
-            var result = await _movieRepository.SearchMoviesAsync(null, null, "Action", null, null);
+            var genres = new List<string> { "Action" };
+            var result = await _movieRepository.SearchMoviesAsync(null, null, genres, null, null);
 
             result.Should().NotBeNullOrEmpty();
             result.Should().BeEquivalentTo(expectedMovies);
@@ -144,23 +144,23 @@ namespace MovieVault.Test.UnitTests.Repositories
         [Fact]
         public async Task SearchMoviesAsync_ShouldGenerateCorrectQuery_WhenFilteringByGenre()
         {
-            var genre = "Action";
+            var genres = new List<string> { "Action" };
 
             var expectedMovies = new List<Movie>
             {
                 new Movie { MovieId = 1, Title = "The Dark Knight", ReleaseYear = 2008, Duration = 152 }
             };
 
-            _dbHelperMock.Setup(db => db.ExecuteReaderAsync(It.Is<string>(query => query.Contains("WHERE g.GenreName = @Genre")),
+            _dbHelperMock.Setup(db => db.ExecuteReaderAsync(It.Is<string>(query => query.Contains("WHERE g.GenreName IN (@Genre0)")),
                     It.IsAny<Func<IDataReader, Movie>>(),
                     It.IsAny<SqlParameter[]>()))
                 .ReturnsAsync(expectedMovies);
 
-            var result = await _movieRepository.SearchMoviesAsync(null, null, genre, null, null);
+            var result = await _movieRepository.SearchMoviesAsync(null, null, genres, null, null);
 
             _dbHelperMock.Verify(db =>
                     db.ExecuteReaderAsync(
-                        It.Is<string>(query => query.Contains("WHERE g.GenreName = @Genre")),
+                        It.Is<string>(query => query.Contains("WHERE g.GenreName IN (@Genre0)")),
                         It.IsAny<Func<IDataReader, Movie>>(),
                         It.IsAny<SqlParameter[]>()
                     ),

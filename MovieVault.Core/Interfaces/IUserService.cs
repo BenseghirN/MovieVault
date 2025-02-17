@@ -7,8 +7,8 @@ namespace MovieVault.Core.Interfaces
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<User> GetUserByIdAsync(int userId);
         Task<User> GetUserByEmailAsync(string email);
-        Task<int> RegisterUserAsync(string userName, string email, string password);
-        Task<bool> UpdateUserAsync(int userId, string userName, string email, string password);
+        Task<int> RegisterUserAsync(User user, string password);
+        Task<bool> UpdateUserAsync(User user);
         Task<bool> DeleteUserAsync(int userId);
         Task<bool> ValidatePasswordAsync(string email, string password);
     }
