@@ -70,5 +70,37 @@ namespace MovieVault.Test.UnitTests.Services
             var result = await _movieService.UpdateMovieAsync(movie);
             Assert.True(result);
         }
+
+        [Fact]
+        public async Task DeleteMovieAsync_ShouldReturnFalse_WhenMovieIsInUserCollection()
+        {
+            _dbHelperMock.Setup(db => db.ExecuteScalarAsync(
+                It.Is<string>(s => s.Contains("SELECT COUNT(*) FROM UserMovies")),
+                It.IsAny<SqlParameter[]>()
+            )).ReturnsAsync((object)1);
+
+            var result = await _movieService.DeleteMovieAsync(1);
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task DeleteMovieAsync_ShouldReturnTrue_WhenMovieIsNotInUserCollection()
+        {
+            _dbHelperMock.Setup(db => db.ExecuteScalarAsync(
+                It.Is<string>(s => s.Contains("SELECT COUNT(*) FROM UserMovies")),
+                It.IsAny<SqlParameter[]>()
+            )).ReturnsAsync((object)0);
+
+            // Mock suppression réussie
+            _dbHelperMock.Setup(db => db.ExecuteQueryAsync(
+                It.Is<string>(s => s.Contains("DELETE FROM Movies")),
+                It.IsAny<SqlParameter[]>()
+            )).ReturnsAsync(1);
+
+            var result = await _movieService.DeleteMovieAsync(1);
+
+            Assert.True(result);
+        }
     }
 }

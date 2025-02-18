@@ -12,7 +12,7 @@ namespace MovieVault.Data.Interfaces
         Task<IEnumerable<Movie>> SearchMoviesAsync(string? title, IEnumerable<int>? years, IEnumerable<string>? genres, IEnumerable<string>? directors, IEnumerable<string>? actors);
         Task<int> CreateMovieAsync(Movie movie, SqlTransaction? transaction = null);
         Task<bool> UpdateMovieAsync(Movie movie);
-        Task<bool> DeleteMovieAsync(int movieId, SqlTransaction? transaction = null);
+        Task<bool> DeleteMovieAsync(int movieId);
         Task<bool> MovieExistsAsync(Movie movie, SqlTransaction? transaction);
     }
 }

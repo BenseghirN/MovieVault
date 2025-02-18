@@ -1,6 +1,6 @@
 ﻿namespace MovieVault.Data.Models;
 
-public class People
+public class Person
 {
     public int PersonId { get; set; }
     public string? FirstName { get; set; }
@@ -10,5 +10,5 @@ public class People
     public string? PhotoUrl { get; set; }
     public int? TMDBId { get; set; }
 
-    public HashSet<MoviesPeople> MoviesPeople { get; set; } = new();
+    public HashSet<MoviesPerson> MoviesPeople { get; set; } = new();
 }

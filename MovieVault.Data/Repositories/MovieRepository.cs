@@ -6,9 +6,9 @@ using System.Data;
 
 namespace MovieVault.Data.Repositories
 {
-    public class MovieRepository(IDBHelper iDbHelper) : IMovieRepository
+    public class MovieRepository(IDBHelper dbHelper) : IMovieRepository
     {
-        private readonly IDBHelper _idbHelper = iDbHelper ?? throw new ArgumentNullException(nameof(iDbHelper));
+        private readonly IDBHelper _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper));
 
         public async Task<int> CreateMovieAsync(Movie movie, SqlTransaction? transaction = null)
         {
@@ -26,27 +26,23 @@ namespace MovieVault.Data.Repositories
                 new SqlParameter("@PosterUrl", (object?)movie.PosterUrl ?? DBNull.Value)
             };
 
-            var movieId = await _idbHelper.ExecuteScalarAsync(query, transaction, movieParams);
+            var movieId = await _dbHelper.ExecuteScalarAsync(query, transaction, movieParams);
 
             return movieId == null ? 0 : (int)movieId;
         }
 
-        public async Task<bool> DeleteMovieAsync(int movieId, SqlTransaction? transaction = null)
+        public async Task<bool> DeleteMovieAsync(int movieId)
         {
             var checkUserQuery = "SELECT COUNT(*) FROM UserMovies WHERE MovieId = @MovieId";
-            var userCount = (int?)await _idbHelper.ExecuteScalarAsync(checkUserQuery, transaction, new SqlParameter("@MovieId", movieId)) ?? 0;
+            var userCount = (int?)await _dbHelper.ExecuteScalarAsync(checkUserQuery, new SqlParameter("@MovieId", movieId)) ?? 0;
             if (userCount > 0)
             {
                 return false; // Can't delete, movie is liked to User
             }
 
-            // Deleting relations
-            await _idbHelper.ExecuteQueryAsync("DELETE FROM MoviesGenres WHERE MovieId = @MovieId", transaction, new SqlParameter("@MovieId", movieId));
-            await _idbHelper.ExecuteQueryAsync("DELETE FROM MoviesPeople WHERE MovieId = @MovieId", transaction, new SqlParameter("@MovieId", movieId));
-
             // Deleting the movie
             var query = "DELETE FROM Movies WHERE MovieId = @MovieId";
-            int rowsAffected = await _idbHelper.ExecuteQueryAsync(query, transaction, new SqlParameter("@MovieId", movieId));
+            int rowsAffected = await _dbHelper.ExecuteQueryAsync(query, new SqlParameter("@MovieId", movieId));
 
             return rowsAffected > 0;
         }
@@ -59,7 +55,7 @@ namespace MovieVault.Data.Repositories
                 new SqlParameter("@Offset", offset),
                 new SqlParameter("@Limit", limit)
             };
-            return await _idbHelper.ExecuteReaderAsync(query, MapToMovie);
+            return await _dbHelper.ExecuteReaderAsync(query, MapToMovie);
         }
 
         public async Task<Movie?> GetMovieByIdAsync(int movieId)
@@ -67,7 +63,7 @@ namespace MovieVault.Data.Repositories
             var query = "SELECT * FROM Movies WHERE MovieId = @MovieId";
             var parameters = new SqlParameter[] { new SqlParameter("@MovieId", movieId) };
 
-            var movie = await _idbHelper.ExecuteReaderAsync(query, MapToMovie, parameters);
+            var movie = await _dbHelper.ExecuteReaderAsync(query, MapToMovie, parameters);
             return movie.SingleOrDefault();
         }
 
@@ -76,7 +72,7 @@ namespace MovieVault.Data.Repositories
             var query = "SELECT * FROM Movies WHERE ReleaseYear LIKE @ReleaseYear";
             var parameters = new SqlParameter[] { new SqlParameter("@ReleaseYear", $"%{releaseYear}%") };
 
-            return await _idbHelper.ExecuteReaderAsync(query, MapToMovie, parameters);
+            return await _dbHelper.ExecuteReaderAsync(query, MapToMovie, parameters);
         }
 
         public async Task<IEnumerable<Movie>> GetMovieByTitleAsync(string title)
@@ -84,7 +80,7 @@ namespace MovieVault.Data.Repositories
             var query = "SELECT * FROM Movies WHERE Title LIKE @Title";
             var parameters = new SqlParameter[] { new SqlParameter("@Title", $"%{title}%") };
 
-            return await _idbHelper.ExecuteReaderAsync(query, MapToMovie, parameters);
+            return await _dbHelper.ExecuteReaderAsync(query, MapToMovie, parameters);
         }
 
         public async Task<IEnumerable<Movie>> SearchMoviesAsync(string? title, IEnumerable<int>? years, IEnumerable<string>? genres, IEnumerable<string>? directors, IEnumerable<string>? actors)
@@ -101,7 +97,7 @@ namespace MovieVault.Data.Repositories
             if (conditions.Any())
                 query += " WHERE " + string.Join(" AND ", conditions);
 
-            return await _idbHelper.ExecuteReaderAsync(query, MapToMovie, parameters.ToArray());
+            return await _dbHelper.ExecuteReaderAsync(query, MapToMovie, parameters.ToArray());
         }
 
         public async Task<bool> UpdateMovieAsync(Movie movie)
@@ -118,7 +114,7 @@ namespace MovieVault.Data.Repositories
                 new SqlParameter("@TMDBId", movie.TMDBId)
             };
 
-            int rowsAffected = await _idbHelper.ExecuteQueryAsync(query, parameters);
+            int rowsAffected = await _dbHelper.ExecuteQueryAsync(query, parameters);
             return rowsAffected > 0;
         }
 
@@ -127,35 +123,33 @@ namespace MovieVault.Data.Repositories
             if (movie.TMDBId.HasValue)
             {
                 var queryTMDB = "SELECT COUNT(*) FROM Movies WHERE TMDBId = @TMDBId";
-                var countTMDB = (int?)await _idbHelper.ExecuteScalarAsync(queryTMDB, new SqlParameter("@TMDBId", movie.TMDBId.Value)) ?? 0;
+                var countTMDB = (int?)await _dbHelper.ExecuteScalarAsync(queryTMDB, new SqlParameter("@TMDBId", movie.TMDBId.Value)) ?? 0;
                 if (countTMDB > 0)
                     return true;
             }
 
             var query = @"
-                    SELECT COUNT(*) 
-                    FROM Movies m
-                    JOIN MoviesPeople mp ON m.MovieId = mp.MovieId
-                    JOIN People p ON mp.PersonId = p.PersonId
-                    WHERE m.Title = @Title 
-                    AND m.ReleaseYear = @ReleaseYear
-                    AND p.FirstName = @DirectorFirstName
-                    AND p.LastName = @DirectorLastName
-                    AND mp.Role = 1";
+                SELECT COUNT(*) 
+                FROM Movies m
+                JOIN MoviesPeople mp ON m.MovieId = mp.MovieId
+                JOIN People p ON mp.PersonId = p.PersonId
+                WHERE m.Title = @Title 
+                AND m.ReleaseYear = @ReleaseYear
+                AND p.PersonId = @DirectorId
+                AND mp.Role = 1";
 
-            var director = movie.MoviesPeople.FirstOrDefault(p => p.Role == 1)?.Person;
+            var directorId = movie.MoviesPeople.FirstOrDefault(p => p.Role == 1)?.PersonId;
 
-            if (director == null) return false;
+            if (directorId == null) return false;
 
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@Title", movie.Title),
                 new SqlParameter("@ReleaseYear", movie.ReleaseYear),
-                new SqlParameter("@DirectorFirstName", director?.FirstName),
-                new SqlParameter("@DirectorLastName", director?.LastName)
+                new SqlParameter("@DirectorId", directorId),
             };
 
-            var count = (int?)await _idbHelper.ExecuteScalarAsync(query, transaction, parameters) ?? 0;
+            var count = (int?)await _dbHelper.ExecuteScalarAsync(query, transaction, parameters) ?? 0;
             return count > 0;
         }
 

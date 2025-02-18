@@ -6,14 +6,14 @@ using System.Data;
 
 namespace MovieVault.Data.Repositories
 {
-    public class UserRepository(IDBHelper iDbHelper) : IUserRepository
+    public class UserRepository(IDBHelper dbHelper) : IUserRepository
     {
-        private readonly IDBHelper _iDbHelper = iDbHelper ?? throw new ArgumentNullException(nameof(iDbHelper));
+        private readonly IDBHelper _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper));
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
             var query = "SELECT * FROM Users";
-            return await _iDbHelper.ExecuteReaderAsync(query, MapToUser);
+            return await _dbHelper.ExecuteReaderAsync(query, MapToUser);
         }
 
         public async Task<User?> GetUserByIdAsync(int userId)
@@ -21,7 +21,7 @@ namespace MovieVault.Data.Repositories
             var query = "SELECT * FROM Users WHERE UserId = @UserId";
             var parameters = new SqlParameter[] { new SqlParameter("@UserId", userId) };
 
-            var users = await _iDbHelper.ExecuteReaderAsync(query, MapToUser, parameters);
+            var users = await _dbHelper.ExecuteReaderAsync(query, MapToUser, parameters);
             return users.SingleOrDefault();
         }
 
@@ -30,7 +30,7 @@ namespace MovieVault.Data.Repositories
             var query = "SELECT * FROM Users WHERE Email = @Email";
             var parameters = new SqlParameter[] { new SqlParameter("@Email", email) };
 
-            var users = await _iDbHelper.ExecuteReaderAsync(query, MapToUser, parameters);
+            var users = await _dbHelper.ExecuteReaderAsync(query, MapToUser, parameters);
             return users.SingleOrDefault();
         }
 
@@ -44,7 +44,7 @@ namespace MovieVault.Data.Repositories
                 new SqlParameter("@PasswordHash", user.PasswordHash)
             };
 
-            var userId = await _iDbHelper.ExecuteScalarAsync(query, parameters);
+            var userId = await _dbHelper.ExecuteScalarAsync(query, parameters);
             return userId != null ? (int)userId : 0;
         }
 
@@ -59,7 +59,7 @@ namespace MovieVault.Data.Repositories
                 new SqlParameter("@PasswordHash", user.PasswordHash)
             };
 
-            int rowsAffected = await _iDbHelper.ExecuteQueryAsync(query, parameters);
+            int rowsAffected = await _dbHelper.ExecuteQueryAsync(query, parameters);
             return rowsAffected > 0;
         }
 
@@ -68,7 +68,7 @@ namespace MovieVault.Data.Repositories
             var query = "DELETE FROM Users WHERE UserId = @UserId";
             var parameters = new SqlParameter[] { new SqlParameter("@UserId", userId) };
 
-            int rowsAffected = await _iDbHelper.ExecuteQueryAsync(query, parameters);
+            int rowsAffected = await _dbHelper.ExecuteQueryAsync(query, parameters);
             return rowsAffected > 0;
         }
 

@@ -39,27 +39,15 @@ namespace MovieVault.Core.Services
         public async Task<bool> DeleteMovieAsync(int movieId)
         {
             _logger.LogInformation("Attempting to delete movie with ID {movieId}", movieId);
-            using var connection = await _dbHelper.OpenConnectionAsync();
-            using var transaction = await _dbHelper.BeginTransactionAsync(connection);
-            try
-            {
-                bool success = await _movieRepository.DeleteMovieAsync(movieId, transaction);
-                if (!success)
-                {
-                    _logger.LogWarning("Failed to delete movie with ID {movieId} - Movie may not exist.", movieId);
-                    transaction.Rollback();
-                    return false;
-                }
-                transaction.Commit();
+
+            bool result = await _movieRepository.DeleteMovieAsync(movieId);
+
+            if (result)
                 _logger.LogInformation("Successfully deleted movie with ID {movieId}", movieId);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting movie with ID {movieId}", movieId);
-                transaction.Rollback();
-                return false;
-            }
+            else
+                _logger.LogWarning("Failed to delete movie with ID {movieId} - Movie may not exist.", movieId);
+
+            return result;
         }
 
         public async Task<IEnumerable<Movie>> GetAllMoviesAsync(int offset, int limit)
