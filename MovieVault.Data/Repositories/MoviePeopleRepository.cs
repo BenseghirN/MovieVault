@@ -18,7 +18,7 @@ namespace MovieVault.Data.Repositories
             var parameters = new SqlParameter[]{
                 new SqlParameter("@MovieId", moviePerson.MovieId),
                 new SqlParameter("@PersonId", moviePerson.PersonId),
-                new SqlParameter("@Role", moviePerson.Role)
+                new SqlParameter("@Role", (int)moviePerson.Role)
             };
 
             int rowsAffected = await _dbHelper.ExecuteQueryAsync(query, parameters);
@@ -63,7 +63,7 @@ namespace MovieVault.Data.Repositories
             {
                 MovieId = reader.SafeGet<int>("MovieId"),
                 PersonId = reader.SafeGet<int>("PersonId"),
-                Role = reader.SafeGet<int>("Role")
+                Role = (PersonRole)reader.SafeGet<int>("Role")
             };
         }
     }

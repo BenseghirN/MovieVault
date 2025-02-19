@@ -2,7 +2,7 @@ using MovieVault.Data.Models;
 
 namespace MovieVault.Data.Interfaces
 {
-    public interface IMovieGenreRepository
+    public interface IMoviesGenresRepository
     {
         Task<bool> AddMovieGenreAsync(int movieId, int genreId);
         Task<bool> RemoveMovieGenreAsync(int movieId, int genreId);

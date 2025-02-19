@@ -40,6 +40,16 @@ namespace MovieVault.Data.Repositories
             return await _dbHelper.ExecuteReaderAsync(query, MapToReview);
         }
 
+        public async Task<Review?> GetReviewsByIdAsync(int reviewId)
+        {
+            var query = "SELECT * FROM Reviews WHERE ReviewId = @ReviewId";
+            var parameters = new SqlParameter[]{
+                new SqlParameter("@ReviewId", reviewId)
+            };
+            var review = await _dbHelper.ExecuteReaderAsync(query, MapToReview, parameters);
+            return review.SingleOrDefault();
+        }
+
         public async Task<IEnumerable<Review>?> GetReviewsByMovieIdAsync(int movieId)
         {
             var query = "SELECT * FROM Reviews WHERE MovieId = @MovieId";

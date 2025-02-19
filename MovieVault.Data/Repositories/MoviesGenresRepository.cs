@@ -6,7 +6,7 @@ using MovieVault.Data.Utilities;
 
 namespace MovieVault.Data.Repositories
 {
-    public class MovieGenreRepository(IDBHelper dbHelper) : IMovieGenreRepository
+    public class MoviesGenresRepository(IDBHelper dbHelper) : IMoviesGenresRepository
     {
         private readonly IDBHelper _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper));
 

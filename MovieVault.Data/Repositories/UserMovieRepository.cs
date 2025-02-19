@@ -25,11 +25,34 @@ namespace MovieVault.Data.Repositories
             return rowsAffected > 0;
         }
 
-        public async Task<IEnumerable<UserMovie>> GetUserMoviesAsync(int userId)
+        public async Task<UserMovie?> GetUserMovieByIdAsync(int userId, int movieId)
+        {
+            var query = "SELECT * FROM UserMovies WHERE UserId = @UserId AND MovieId = @MovieId";
+            var parameters = new SqlParameter[]
+            {
+                new SqlParameter("@UserId", userId),
+                new SqlParameter("@MovieId", movieId)
+            };
+
+            var result = await _dbHelper.ExecuteReaderAsync(query, MapToUserMovie, parameters);
+            return result.FirstOrDefault();
+        }
+
+        public async Task<IEnumerable<UserMovie>> GetUserMovieCollectionAsync(int userId)
         {
             var query = "SELECT * FROM UserMovies WHERE UserId = @UserId";
             var parameters = new SqlParameter[] {
                 new SqlParameter("@UserId", userId)
+            };
+
+            return await _dbHelper.ExecuteReaderAsync(query, MapToUserMovie, parameters);
+        }
+
+        public async Task<IEnumerable<UserMovie>> GetUserMoviesByMovieAsync(int movieId)
+        {
+            var query = "SELECT * FROM UserMovies WHERE MovieId = @MovieId";
+            var parameters = new SqlParameter[] {
+                new SqlParameter("@MovieId", movieId)
             };
 
             return await _dbHelper.ExecuteReaderAsync(query, MapToUserMovie, parameters);
@@ -44,6 +67,20 @@ namespace MovieVault.Data.Repositories
             };
 
             var rowsAffected = await _dbHelper.ExecuteQueryAsync(query, parameters);
+            return rowsAffected > 0;
+        }
+
+        public async Task<bool> UpdateUserMovieAsync(UserMovie userMovie)
+        {
+            var query = "UPDATE UserMovies SET Status = @Status, Owned = @Owned, LastWatched = @LastWatched WHERE UserId = @UserId AND MovieId = @MovieId";
+            var parameters = new SqlParameter[]
+            {
+                new SqlParameter("@Status", (int)userMovie.Status),
+                new SqlParameter("@Owned", userMovie.Owned),
+                new SqlParameter("@LastWatched", userMovie.LastWatched == null ? DBNull.Value : userMovie.LastWatched )
+            };
+
+            int rowsAffected = await _dbHelper.ExecuteQueryAsync(query, parameters);
             return rowsAffected > 0;
         }
 
