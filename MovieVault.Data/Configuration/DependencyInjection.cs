@@ -18,8 +18,16 @@ namespace MovieVault.Data.Configuration
             services.AddSingleton(loggerFactory);
             services.AddSingleton<IDatabaseConnection>(sp => new DatabaseConnection(sp.GetRequiredService<ILogger<DatabaseConnection>>()));
             services.AddSingleton<IDBHelper, DBHelper>();
-            services.AddSingleton<IUserRepository, UserRepository>();
+
+            services.AddSingleton<IGenreRepository, GenreRepository>();
             services.AddSingleton<IMovieRepository, MovieRepository>();
+            services.AddSingleton<IMoviesGenresRepository, MoviesGenresRepository>();
+            services.AddSingleton<IMoviesPeopleRepository, MoviePeopleRepository>();
+            services.AddSingleton<IPeopleRepository, PeopleRepository>();
+            services.AddSingleton<IReviewRepository, ReviewRepository>();
+            services.AddSingleton<IUserMoviesRepository, UserMovieRepository>();
+            services.AddSingleton<IUserRepository, UserRepository>();
+
             services.AddLogging();
         }
     }
