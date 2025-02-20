@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MovieVault.Core.Interfaces;
 using MovieVault.Core.Services;
+using MovieVault.Core.TMDB;
 
 namespace MovieVault.Core.Configuration
 {
@@ -23,6 +24,7 @@ namespace MovieVault.Core.Configuration
             services.AddSingleton<IReviewService, ReviewService>();
             services.AddSingleton<IUserMoviesService, UserMovieService>();
             services.AddSingleton<IUserService, UserService>();
+            services.AddSingleton<ITmdbService, TmdbService>();
 
             services.AddLogging();
         }
