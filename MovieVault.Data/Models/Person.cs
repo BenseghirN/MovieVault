@@ -11,4 +11,5 @@ public class Person
     public int? TMDBId { get; set; }
 
     public HashSet<MoviesPerson> MoviesPeople { get; set; } = new();
+    public PersonRole? Role { get; set; }
 }

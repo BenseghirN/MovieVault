@@ -13,7 +13,7 @@ namespace MovieVault.Core.Configuration
             services.AddSingleton(loggerFactory);
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<IMovieService, MovieService>();
-            services.AddSingleton<IMovieManagerService, MovieManagerService>();
+            services.AddSingleton<IMovieManagerService, InsertNewMovieService>();
             services.AddLogging();
         }
     }

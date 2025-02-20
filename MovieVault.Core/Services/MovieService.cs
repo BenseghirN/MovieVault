@@ -99,7 +99,7 @@ namespace MovieVault.Core.Services
             return movies;
         }
 
-        public async Task<bool> MovieExistAsync(Movie movie, SqlTransaction? transacion = null)
+        public async Task<bool> MovieExistsAsync(Movie movie, SqlTransaction? transacion = null)
         {
             _logger.LogInformation("Checking if movie already exist in database: {movieTitle}", movie.Title);
             return await _movieRepository.MovieExistsAsync(movie, transacion);

@@ -120,37 +120,12 @@ namespace MovieVault.Data.Repositories
 
         public async Task<bool> MovieExistsAsync(Movie movie, SqlTransaction? transaction = null)
         {
-            if (movie.TMDBId.HasValue)
-            {
-                var queryTMDB = "SELECT COUNT(*) FROM Movies WHERE TMDBId = @TMDBId";
-                var countTMDB = (int?)await _dbHelper.ExecuteScalarAsync(queryTMDB, new SqlParameter("@TMDBId", movie.TMDBId.Value)) ?? 0;
-                if (countTMDB > 0)
-                    return true;
-            }
+            if (!movie.TMDBId.HasValue) return false;
 
-            var query = @"
-                SELECT COUNT(*) 
-                FROM Movies m
-                JOIN MoviesPeople mp ON m.MovieId = mp.MovieId
-                JOIN People p ON mp.PersonId = p.PersonId
-                WHERE m.Title = @Title 
-                AND m.ReleaseYear = @ReleaseYear
-                AND p.PersonId = @DirectorId
-                AND mp.Role = 1";
+            var queryTMDB = "SELECT COUNT(*) FROM Movies WHERE TMDBId = @TMDBId";
+            var countTMDB = (int?)await _dbHelper.ExecuteScalarAsync(queryTMDB, new SqlParameter("@TMDBId", movie.TMDBId.Value)) ?? 0;
+            return countTMDB > 0;
 
-            var directorId = movie.MoviesPeople.FirstOrDefault(p => p.Role == 1)?.PersonId;
-
-            if (directorId == null) return false;
-
-            var parameters = new SqlParameter[]
-            {
-                new SqlParameter("@Title", movie.Title),
-                new SqlParameter("@ReleaseYear", movie.ReleaseYear),
-                new SqlParameter("@DirectorId", directorId),
-            };
-
-            var count = (int?)await _dbHelper.ExecuteScalarAsync(query, transaction, parameters) ?? 0;
-            return count > 0;
         }
 
         private Movie MapToMovie(IDataReader reader)

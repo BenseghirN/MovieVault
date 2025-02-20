@@ -13,6 +13,6 @@ namespace MovieVault.Core.Interfaces
         Task<bool> UpdateMovieAsync(Movie movie);
         Task<bool> DeleteMovieAsync(int movieId);
         Task<IEnumerable<Movie>> SearchMoviesAsync(string? title, IEnumerable<int>? years, IEnumerable<string>? genres, IEnumerable<string>? directors, IEnumerable<string>? actors);
-        Task<bool> MovieExistAsync(Movie movie, SqlTransaction? transacion = null);
+        Task<bool> MovieExistsAsync(Movie movie, SqlTransaction? transacion = null);
     }
 }
