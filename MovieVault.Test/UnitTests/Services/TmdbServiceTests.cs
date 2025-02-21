@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
+using Moq.Protected;
 using MovieVault.Core.TMDB;
 using System.Net;
-using Moq.Protected;
 
 namespace MovieVault.Test.UnitTests.Services
 {

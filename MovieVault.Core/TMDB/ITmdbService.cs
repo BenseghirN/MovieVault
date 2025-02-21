@@ -1,5 +1,4 @@
 using MovieVault.Data.Models;
-using Newtonsoft.Json.Linq;
 
 namespace MovieVault.Core.TMDB
 {
