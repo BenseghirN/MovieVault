@@ -1,9 +1,9 @@
-using Moq;
-using MovieVault.Data.Interfaces;
-using MovieVault.Core.Services;
-using Microsoft.Extensions.Logging;
-using MovieVault.Data.Models;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
+using Moq;
+using MovieVault.Core.Services;
+using MovieVault.Data.Interfaces;
+using MovieVault.Data.Models;
 
 namespace MovieVault.Test.UnitTests.Services
 {
@@ -85,7 +85,7 @@ namespace MovieVault.Test.UnitTests.Services
         }
 
         [Fact]
-        public async Task DeleteMovieAsync_ShouldReturnTrue_WhenMovieIsNotInUserCollection()
+        public async Task DeleteMovieAsync_ShouldReturnFalse_WhenMovieIsNotInUserCollection()
         {
             _dbHelperMock.Setup(db => db.ExecuteScalarAsync(
                 It.Is<string>(s => s.Contains("SELECT COUNT(*) FROM UserMovies")),
@@ -100,7 +100,7 @@ namespace MovieVault.Test.UnitTests.Services
 
             var result = await _movieService.DeleteMovieAsync(1);
 
-            Assert.True(result);
+            Assert.False(result);
         }
     }
 }

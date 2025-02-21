@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using MovieVault.Core.Interfaces;
+using MovieVault.Core.TMDB;
 using MovieVault.UI.Configuration;
 
 namespace MovieVault.UI
@@ -17,7 +17,7 @@ namespace MovieVault.UI
             var serviceProvider = DependencyInjection.ConfigureServices();
 
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1(serviceProvider.GetRequiredService<IUserService>()));
+            Application.Run(new Form1(serviceProvider.GetRequiredService<ITmdbService>()));
         }
     }
 }

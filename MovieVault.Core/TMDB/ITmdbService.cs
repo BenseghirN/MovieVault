@@ -7,6 +7,7 @@ namespace MovieVault.Core.TMDB
     {
         Task<bool> TestTmdbConnection();
         Task<List<Movie>> SearchMovieAsync(string query);
-        Task<JObject> SearchPersonAsync(string query);
+        Task<Movie> GetMovieDetailsAsync(int tmdbId);
+        Task<List<Person>> GetMovieCastAsync(int tmdbId);
     }
 }

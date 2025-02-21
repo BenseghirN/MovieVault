@@ -1,37 +1,54 @@
 using MovieVault.Core.Interfaces;
-using System.Data;
+using MovieVault.Core.TMDB;
+using MovieVault.Data.Models;
 
 namespace MovieVault.UI
 {
     public partial class Form1 : Form
     {
         private readonly IUserService _userService;
-        public Form1(IUserService userService)
+        private readonly ITmdbService _tmdbService;
+        public Form1(ITmdbService tmdbService)
         {
-            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _tmdbService = tmdbService ?? throw new ArgumentNullException(nameof(tmdbService));
             InitializeComponent();
-            LoadUsers();
+            moviesBindingSource = new BindingSource();
+            moviesListBox.DisplayMember = "Title";
         }
 
-        private async void LoadUsers()
+        private async void searchButton_Click(object sender, EventArgs e)
         {
-            try
+            moviesBindingSource.Clear();
+            var searchQuery = searchTextBox.Text.Trim();
+            var result = await _tmdbService.SearchMovieAsync(searchQuery);
+            foreach (var movie in result)
             {
-                var users = await _userService.GetAllUsersAsync();
-                var dataTable = new DataTable();
-                dataTable.Columns.Add("UserName");
-                dataTable.Columns.Add("Email");
-                dataTable.Columns.Add("Password");
-                foreach (var user in users)
+                if (string.IsNullOrEmpty(movie.Title))
                 {
-                    dataTable.Rows.Add(user.UserName, user.Email, user.PasswordHash);
+                    MessageBox.Show("Un ou plusieurs films ne contiennent pas de titre !");
                 }
-                dataGridViewUsers.DataSource = dataTable;
             }
-            catch (Exception e)
+            moviesBindingSource.DataSource = result.ToList();
+            moviesListBox.DataSource = moviesBindingSource;
+
+        }
+
+        private async void moviesListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            crewListBox.Items.Clear();
+            var selectedMovie = (Movie)moviesListBox.SelectedItem;
+            if (selectedMovie != null)
             {
-                MessageBox.Show($"Erreur lors du chargement des utilisateurs : {e.Message}", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                var people = await _tmdbService.GetMovieCastAsync((int)selectedMovie.TMDBId);
+
+                foreach (var person in people)
+                {
+                    crewListBox.Items.Add($"{person.FirstName} {person.LastName} {person.Role}");
+                }
             }
+
+
+            //MessageBox.Show($"test: {selectedMovie.Synopsis}");
         }
     }
 }

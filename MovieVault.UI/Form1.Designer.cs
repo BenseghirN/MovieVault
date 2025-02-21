@@ -28,94 +28,82 @@
         /// </summary>
         private void InitializeComponent()
         {
-            dataGridViewUsers = new DataGridView();
-            dataGridViewMovies = new DataGridView();
-            UserName = new DataGridViewTextBoxColumn();
-            Email = new DataGridViewTextBoxColumn();
-            Title = new DataGridViewTextBoxColumn();
-            ReleaseYear = new DataGridViewTextBoxColumn();
-            Duration = new DataGridViewTextBoxColumn();
-            ((System.ComponentModel.ISupportInitialize)dataGridViewUsers).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)dataGridViewMovies).BeginInit();
+            components = new System.ComponentModel.Container();
+            searchTextBox = new TextBox();
+            searchButton = new Button();
+            moviesListBox = new ListBox();
+            crewListBox = new ListBox();
+            genresListBox = new ListBox();
+            moviesBindingSource = new BindingSource(components);
+            ((System.ComponentModel.ISupportInitialize)moviesBindingSource).BeginInit();
             SuspendLayout();
             // 
-            // dataGridViewUsers
+            // searchTextBox
             // 
-            dataGridViewUsers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewUsers.Columns.AddRange(new DataGridViewColumn[] { UserName, Email });
-            dataGridViewUsers.Location = new Point(36, 62);
-            dataGridViewUsers.Name = "dataGridViewUsers";
-            dataGridViewUsers.RowHeadersWidth = 51;
-            dataGridViewUsers.Size = new Size(818, 227);
-            dataGridViewUsers.TabIndex = 0;
+            searchTextBox.Location = new Point(112, 92);
+            searchTextBox.Name = "searchTextBox";
+            searchTextBox.Size = new Size(125, 27);
+            searchTextBox.TabIndex = 0;
             // 
-            // dataGridViewMovies
+            // searchButton
             // 
-            dataGridViewMovies.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewMovies.Columns.AddRange(new DataGridViewColumn[] { Title, ReleaseYear, Duration });
-            dataGridViewMovies.Location = new Point(36, 352);
-            dataGridViewMovies.Name = "dataGridViewMovies";
-            dataGridViewMovies.RowHeadersWidth = 51;
-            dataGridViewMovies.Size = new Size(818, 247);
-            dataGridViewMovies.TabIndex = 1;
+            searchButton.Location = new Point(12, 90);
+            searchButton.Name = "searchButton";
+            searchButton.Size = new Size(94, 29);
+            searchButton.TabIndex = 1;
+            searchButton.Text = "button1";
+            searchButton.UseVisualStyleBackColor = true;
+            searchButton.Click += searchButton_Click;
             // 
-            // UserName
+            // moviesListBox
             // 
-            UserName.HeaderText = "UserName";
-            UserName.MinimumWidth = 6;
-            UserName.Name = "UserName";
-            UserName.Width = 125;
+            moviesListBox.FormattingEnabled = true;
+            moviesListBox.Location = new Point(12, 125);
+            moviesListBox.Name = "moviesListBox";
+            moviesListBox.Size = new Size(349, 224);
+            moviesListBox.TabIndex = 2;
+            moviesListBox.SelectedIndexChanged += moviesListBox_SelectedIndexChanged;
             // 
-            // Email
+            // crewListBox
             // 
-            Email.HeaderText = "Email";
-            Email.MinimumWidth = 6;
-            Email.Name = "Email";
-            Email.Width = 125;
+            crewListBox.FormattingEnabled = true;
+            crewListBox.Location = new Point(383, 185);
+            crewListBox.Name = "crewListBox";
+            crewListBox.Size = new Size(312, 164);
+            crewListBox.TabIndex = 3;
             // 
-            // Title
+            // genresListBox
             // 
-            Title.HeaderText = "Title";
-            Title.MinimumWidth = 6;
-            Title.Name = "Title";
-            Title.Width = 125;
-            // 
-            // ReleaseYear
-            // 
-            ReleaseYear.HeaderText = "ReleaseYear";
-            ReleaseYear.MinimumWidth = 6;
-            ReleaseYear.Name = "ReleaseYear";
-            ReleaseYear.Width = 125;
-            // 
-            // Duration
-            // 
-            Duration.HeaderText = "Duration";
-            Duration.MinimumWidth = 6;
-            Duration.Name = "Duration";
-            Duration.Width = 125;
+            genresListBox.FormattingEnabled = true;
+            genresListBox.Location = new Point(718, 185);
+            genresListBox.Name = "genresListBox";
+            genresListBox.Size = new Size(315, 164);
+            genresListBox.TabIndex = 4;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1327, 763);
-            Controls.Add(dataGridViewMovies);
-            Controls.Add(dataGridViewUsers);
+            Controls.Add(genresListBox);
+            Controls.Add(crewListBox);
+            Controls.Add(moviesListBox);
+            Controls.Add(searchButton);
+            Controls.Add(searchTextBox);
             Name = "Form1";
             Text = "Form1";
-            ((System.ComponentModel.ISupportInitialize)dataGridViewUsers).EndInit();
-            ((System.ComponentModel.ISupportInitialize)dataGridViewMovies).EndInit();
+            ((System.ComponentModel.ISupportInitialize)moviesBindingSource).EndInit();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
 
-        private DataGridView dataGridViewUsers;
-        private DataGridView dataGridViewMovies;
-        private DataGridViewTextBoxColumn UserName;
-        private DataGridViewTextBoxColumn Email;
-        private DataGridViewTextBoxColumn Title;
-        private DataGridViewTextBoxColumn ReleaseYear;
-        private DataGridViewTextBoxColumn Duration;
+        private TextBox searchTextBox;
+        private Button searchButton;
+        private ListBox moviesListBox;
+        private ListBox crewListBox;
+        private ListBox genresListBox;
+        private BindingSource moviesBindingSource;
     }
 }

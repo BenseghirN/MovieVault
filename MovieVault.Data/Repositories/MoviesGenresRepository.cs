@@ -1,8 +1,8 @@
-using System.Data;
 using Microsoft.Data.SqlClient;
 using MovieVault.Data.Interfaces;
 using MovieVault.Data.Models;
 using MovieVault.Data.Utilities;
+using System.Data;
 
 namespace MovieVault.Data.Repositories
 {

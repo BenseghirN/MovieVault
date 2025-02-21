@@ -60,23 +60,13 @@ namespace MovieVault.Test.UnitTests.Repositories
         [Fact]
         public async Task DeleteMovieAsync_ShouldReturnTrue_WhenMovieIsDeleted()
         {
-            // Setup mock for ExecuteScalarAsync to return 0 (no user likes the movie)
+            // Arrange : aucun utilisateur ne like le film
             _dbHelperMock.Setup(db => db.ExecuteScalarAsync(It.Is<string>(s => s.Contains("SELECT COUNT(*) FROM UserMovies")),
-                    It.IsAny<SqlTransaction>(),
                     It.IsAny<SqlParameter[]>()))
                 .ReturnsAsync((object)0);
 
-            // Setup mock for ExecuteQueryAsync to delete movie relations and movie itself
-            _dbHelperMock.Setup(db => db.ExecuteQueryAsync(It.Is<string>(s => s.Contains("DELETE FROM MoviesGenres")),
-                    It.IsAny<SqlTransaction>(),
-                    It.IsAny<SqlParameter[]>()))
-                .ReturnsAsync(1);
-            _dbHelperMock.Setup(db => db.ExecuteQueryAsync(It.Is<string>(s => s.Contains("DELETE FROM MoviesPeople")),
-                    It.IsAny<SqlTransaction>(),
-                    It.IsAny<SqlParameter[]>()))
-                .ReturnsAsync(1);
+            // Arrange : suppression du film retourne 1
             _dbHelperMock.Setup(db => db.ExecuteQueryAsync(It.Is<string>(s => s.Contains("DELETE FROM Movies WHERE MovieId")),
-                    It.IsAny<SqlTransaction>(),
                     It.IsAny<SqlParameter[]>()))
                 .ReturnsAsync(1);
 
@@ -85,7 +75,20 @@ namespace MovieVault.Test.UnitTests.Repositories
 
             // Assert
             result.Should().BeTrue();
+
+            // Vérifications supplémentaires
+            _dbHelperMock.Verify(db => db.ExecuteScalarAsync(
+                    It.Is<string>(s => s.Contains("SELECT COUNT(*) FROM UserMovies")),
+                    It.IsAny<SqlParameter[]>()),
+                Times.Once);
+
+            _dbHelperMock.Verify(db => db.ExecuteQueryAsync(
+                    It.Is<string>(s => s.Contains("DELETE FROM Movies WHERE MovieId")),
+                    It.IsAny<SqlParameter[]>()),
+                Times.Once);
         }
+
+
 
         [Fact]
         public async Task DeleteMovieAsync_ShouldReturnFalse_WhenMovieDoesNotExist()

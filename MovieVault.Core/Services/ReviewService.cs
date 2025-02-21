@@ -42,11 +42,11 @@ namespace MovieVault.Core.Services
             return result;
         }
 
-        public Task<Review?> GetReviewById(int reviewId)
+        public async Task<Review?> GetReviewById(int reviewId)
         {
             _logger.LogInformation("Fetching review {reviewId}", reviewId);
 
-            var review = _reviewRepository.GetReviewsByIdAsync(reviewId);
+            var review = await _reviewRepository.GetReviewsByIdAsync(reviewId);
             if (review == null)
             {
                 _logger.LogWarning("Review with ID: {reviewId} not found.", reviewId);
