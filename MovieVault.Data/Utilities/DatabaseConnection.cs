@@ -30,10 +30,10 @@ namespace MovieVault.Data.Utilities
             return _connection;
         }
 
-        public async Task<SqlTransaction> BeginTransactionAsync(SqlConnection connection)
+        public async Task<SqlTransaction> BeginTransactionAsync(SqlConnection? existing = null)
         {
             _logger.LogInformation("Starting SQL Transaction...");
-            connection = await OpenConnectionAsync();
+            var connection = existing ?? await OpenConnectionAsync();
             return (SqlTransaction)await connection.BeginTransactionAsync();
         }
 

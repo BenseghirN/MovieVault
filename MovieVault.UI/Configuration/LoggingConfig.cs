@@ -16,7 +16,11 @@ namespace MovieVault.UI.Configuration
                 .WriteTo.File(logPath, rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7)
                 .CreateLogger();
 
-            _loggerFactory = LoggerFactory.Create(builder => builder.AddSerilog());
+            _loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder.ClearProviders();
+                builder.AddSerilog(Log.Logger, dispose: true);
+            });
         }
 
         public static ILogger<T> GetLogger<T>()

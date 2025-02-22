@@ -10,10 +10,11 @@ namespace MovieVault.Core.Configuration
         public static void ConfigureCoreServices(IServiceCollection services)
         {
             var configuration = TMDBConfiguration.GetConfiguration();
-            var loggerFactory = LoggingConfig.GetLoggerFactory();
-
             services.AddSingleton(configuration);
+
+            var loggerFactory = MovieVault.Core.Configuration.LoggingConfig.GetLoggerFactory();
             services.AddSingleton(loggerFactory);
+            services.AddLogging();
 
             services.AddSingleton<IGenreService, GenreService>();
             services.AddSingleton<IMovieManagerService, InsertNewMovieService>();
@@ -27,7 +28,6 @@ namespace MovieVault.Core.Configuration
             services.AddSingleton<ITmdbService, TmdbService>();
             services.AddSingleton<IMovieDetailsService, MovieDetailsService>();
 
-            services.AddLogging();
         }
     }
 }

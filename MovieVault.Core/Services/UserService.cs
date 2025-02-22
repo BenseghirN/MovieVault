@@ -116,7 +116,7 @@ namespace MovieVault.Core.Services
             return result;
         }
 
-        public async Task<bool> ValidatePasswordAsync(string email, string password)
+        public async Task<User> ValidatePasswordAsync(string email, string password)
         {
             _logger.LogInformation("Validating password for user: {email}", email);
 
@@ -124,13 +124,13 @@ namespace MovieVault.Core.Services
             if (user == null)
             {
                 _logger.LogWarning("User not found for password validation: {email}", email);
-                return false;
+                return null;
             }
 
             if (user.PasswordHash == null)
             {
                 _logger.LogWarning("Password hash is null for user: {email}", email);
-                return false;
+                return null;
             }
 
             bool isValid = PasswordHasher.VerifyPassword(password, user.PasswordHash);
@@ -139,7 +139,7 @@ namespace MovieVault.Core.Services
             else
                 _logger.LogWarning("Password validation failed for user: {email}", email);
 
-            return isValid;
+            return user;
         }
     }
 }

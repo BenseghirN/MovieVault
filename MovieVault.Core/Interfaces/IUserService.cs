@@ -10,6 +10,6 @@ namespace MovieVault.Core.Interfaces
         Task<int> RegisterUserAsync(User user, string password);
         Task<bool> UpdateUserAsync(User user);
         Task<bool> DeleteUserAsync(int userId);
-        Task<bool> ValidatePasswordAsync(string email, string password);
+        Task<User> ValidatePasswordAsync(string email, string password);
     }
 }

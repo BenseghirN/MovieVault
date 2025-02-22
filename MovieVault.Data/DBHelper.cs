@@ -52,9 +52,18 @@ namespace MovieVault.Data
 
         private async Task<int> ExecuteQueryWithTransactionAsync(string query, SqlTransaction transaction, params SqlParameter[] parameters)
         {
-            await using var connection = transaction?.Connection ?? await OpenConnectionAsync();
+            bool isNewConnection = false;
+            bool isNewTransaction = false;
 
-            SqlTransaction localTransaction = transaction ?? await BeginTransactionAsync(connection);
+            var connection = transaction?.Connection;
+            if (connection == null)
+            {
+                connection = await OpenConnectionAsync();
+                isNewConnection = true;
+            }
+
+            var localTransaction = transaction ?? await BeginTransactionAsync(connection);
+            isNewTransaction = transaction == null;
 
             try
             {
@@ -97,10 +106,18 @@ namespace MovieVault.Data
         private async Task<IEnumerable<T>> ExecuteReaderWithTransactionAsync<T>(string query, Func<IDataReader, T> map, SqlTransaction transaction, params SqlParameter[] parameters)
         {
             var results = new List<T>();
+            bool isNewConnection = false;
+            bool isNewTransaction = false;
 
-            await using var connection = transaction?.Connection ?? await OpenConnectionAsync();
+            var connection = transaction?.Connection;
+            if (connection == null)
+            {
+                connection = await OpenConnectionAsync();
+                isNewConnection = true;
+            }
 
-            SqlTransaction localTransaction = transaction ?? await BeginTransactionAsync(connection);
+            var localTransaction = transaction ?? await BeginTransactionAsync(connection);
+            isNewTransaction = transaction == null;
 
             try
             {
@@ -151,9 +168,18 @@ namespace MovieVault.Data
 
         private async Task<object?> ExecuteScalarWithTransactionAsync(string query, SqlTransaction transaction, params SqlParameter[] parameters)
         {
-            await using var connection = transaction?.Connection ?? await OpenConnectionAsync();
+            bool isNewConnection = false;
+            bool isNewTransaction = false;
 
-            SqlTransaction localTransaction = transaction ?? (SqlTransaction)await connection.BeginTransactionAsync();
+            var connection = transaction?.Connection;
+            if (connection == null)
+            {
+                connection = await OpenConnectionAsync();
+                isNewConnection = true;
+            }
+
+            var localTransaction = transaction ?? await BeginTransactionAsync(connection);
+            isNewTransaction = transaction == null;
 
             try
             {
