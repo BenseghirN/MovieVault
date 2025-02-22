@@ -57,7 +57,7 @@ docker-compose up --build -d
 
 ### 4️⃣ Vérifier la connexion SQL
 ```bash
-docker exec -it movievault-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P 'password123!' -Q "SELECT name FROM sys.databases;"
+docker exec -it movievault-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P 'K]xr!9*a>sPw' -Q "SELECT name FROM sys.databases;"
 ```
 
 ### 5️⃣ Lancer l'application
