@@ -1,0 +1,56 @@
+@startuml MCD
+skinparam linetype ortho
+
+entity "Utilisateur" as Users {
+  UserName
+  Email
+}
+
+entity "Film" as Movies {
+  Title
+  ReleaseYear
+  Duration
+  Synopsis
+}
+
+entity "Personne" as People {
+  FirstName
+  LastName
+  BirthDate
+  Nationality
+}
+
+entity "Genre" as Genres {
+  GenreName
+}
+
+entity "Critique" as Reviews {
+  Comment
+  Rating
+  ReviewDate
+}
+
+' Entités associatives pour représenter les liaisons
+entity "Rédige" as Writes
+entity "Juge" as Judges
+entity "Joue dans" as ActsIn
+entity "Classé sous" as Categorized
+entity "Possède/A vu" as Owns
+
+' Associations avec cardinalités mises à jour (1,N)
+Users ||--|| Writes : "1,1"
+Writes }--|| Reviews : "1,N"
+
+Reviews ||--|| Judges : "1,1"
+Judges }--|| Movies : "1,N"
+
+People ||--|| ActsIn : "1,N"
+ActsIn }--|| Movies : "1,N"
+
+Movies ||--|| Categorized : "1,N"
+Categorized }--|| Genres : "1,N"
+
+Users ||--|| Owns : "1,N"
+Owns }--|| Movies : "1,N"
+
+@enduml

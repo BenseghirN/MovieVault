@@ -1,0 +1,186 @@
+@startuml ClassDiagram
+skinparam linetype ortho
+
+' === CLASSES MODELES ===
+class Users {
+  - UserId : int
+  - UserName : string
+  - Email : string
+  - PasswordHash : string
+}
+
+class Movies {
+  - MovieId : int
+  - Title : string
+  - ReleaseYear : int
+  - Duration : int
+  - Synopsis : string
+  - PosterUrl : string
+}
+
+class People {
+  - PersonId : int
+  - FirstName : string
+  - LastName : string
+  - BirthDate : DateTime
+  - Nationality : string
+  - PhotoUrl : string
+}
+
+class Genres {
+  - GenreId : int
+  - GenreName : string
+}
+
+class Reviews {
+  - ReviewId : int
+  - Comment : string
+  - Rating : int
+  - ReviewDate : DateTime
+}
+
+' === INTERFACES REPOSITORY ===
+interface IUserRepository {
+  + GetAllUsersAsync() : Task<IEnumerable<User>>
+  + GetUserByIdAsync(int userId) : Task<User?>
+  + GetUserByEmailAsync(string email) : Task<User?>
+  + CreateUserAsync(User user) : Task<int>
+  + UpdateUserAsync(User user) : Task<bool>
+  + DeleteUserAsync(int userId) : Task<bool>
+}
+
+interface IMovieRepository {
+  + GetAllMoviesAsync(int offset, int limit) : Task<IEnumerable<Movie>>
+  + GetMovieByIdAsync(int movieId) : Task<Movie?>
+  + GetMovieByTitleAsync(string title) : Task<IEnumerable<Movie>>
+  + GetMovieByReleaseYearAsync(int year) : Task<IEnumerable<Movie>>
+  + SearchMoviesAsync(...) : Task<IEnumerable<Movie>>
+  + CreateMovieAsync(Movie movie, SqlTransaction? transaction) : Task<int>
+  + UpdateMovieAsync(Movie movie) : Task<bool>
+  + DeleteMovieAsync(int movieId) : Task<bool>
+  + MovieExistsAsync(Movie movie, SqlTransaction? transaction) : Task<bool>
+}
+
+interface IReviewRepository {
+  + GetReviewsByMovieIdAsync(int movieId) : Task<IEnumerable<Review>?>
+  + GetReviewsByUserIdAsync(int userId) : Task<IEnumerable<Review>>
+  + GetReviewsByIdAsync(int reviewId) : Task<Review?>
+  + CreateReviewAsync(Review review) : Task<int>
+  + DeleteReviewAsync(int reviewId) : Task<bool>
+  + UpdateReviewAsync(Review review) : Task<bool>
+  + GetAllReviews(int offset, int limit) : Task<IEnumerable<Review>?>
+}
+
+interface IPeopleRepository {
+  + GetAllPeopleAsync(int offset, int limit) : Task<IEnumerable<Person>>
+  + GetPersonByIdAsync(int personId) : Task<Person?>
+  + GetPeopleByNameAsync(string personName) : Task<IEnumerable<Person>?>
+  + PersonExistsAsync(Person person) : Task<bool>
+  + CreatePersonAsync(Person person) : Task<int>
+  + DeletePersonAsync(int personId) : Task<bool>
+}
+
+interface IGenreRepository {
+  + GetAllGenresAsync() : Task<IEnumerable<Genre>>
+  + GetGenreByIdAsync(int genreId) : Task<Genre?>
+  + GenreExistsAsync(Genre genre) : Task<bool>
+  + CreateGenreAsync(Genre genre) : Task<int>
+  + DeleteGenreAsync(int genreId) : Task<bool>
+}
+
+' === IMPLEMENTATIONS REPOSITORY ===
+class UserRepository
+class MovieRepository
+class ReviewRepository
+class PeopleRepository
+class GenreRepository
+
+UserRepository ..|> IUserRepository
+MovieRepository ..|> IMovieRepository
+ReviewRepository ..|> IReviewRepository
+PeopleRepository ..|> IPeopleRepository
+GenreRepository ..|> IGenreRepository
+
+' === INTERFACES SERVICES ===
+interface IUserService {
+  + GetAllUsersAsync() : Task<IEnumerable<User>>
+  + GetUserByIdAsync(int userId) : Task<User>
+  + GetUserByEmailAsync(string email) : Task<User>
+  + RegisterUserAsync(User user, string password) : Task<int>
+  + UpdateUserAsync(User user) : Task<bool>
+  + DeleteUserAsync(int userId) : Task<bool>
+  + ValidatePasswordAsync(string email, string password) : Task<User>
+}
+
+interface IMovieService {
+  + CreateMovieAsync(Movie movie, SqlTransaction? transaction) : Task<int>
+  + GetAllMoviesAsync(int offset, int limit) : Task<IEnumerable<Movie>>
+  + GetMovieByIdAsync(int movieId) : Task<Movie?>
+  + GetMoviesByTitleAsync(string title) : Task<IEnumerable<Movie>>
+  + GetMoviesByReleaseYearAsync(int year) : Task<IEnumerable<Movie>>
+  + UpdateMovieAsync(Movie movie) : Task<bool>
+  + DeleteMovieAsync(int movieId) : Task<bool>
+  + SearchMoviesAsync(...) : Task<IEnumerable<Movie>>
+  + MovieExistsAsync(Movie movie, SqlTransaction? transaction) : Task<bool>
+}
+
+interface IReviewService {
+  + GetReviewsByMovieIdAsync(int movieId) : Task<IEnumerable<Review>>
+  + GetReviewsByUserIdAsync(int userId) : Task<IEnumerable<Review>>
+  + GetReviewById(int reviewId) : Task<Review?>
+  + CreateReviewAsync(Review review) : Task<int>
+  + DeleteReviewAsync(int reviewId) : Task<bool>
+  + UpdateReviewAsync(Review review) : Task<bool>
+}
+
+interface IPeopleService {
+  + GetAllPeopleAsync(int offset, int limit) : Task<IEnumerable<Person>>
+  + GetPersonByIdAsync(int personId) : Task<Person?>
+  + PersonExistsAsync(Person person) : Task<bool>
+  + CreatePersonAsync(Person person) : Task<int>
+  + DeletePersonAsync(int personId) : Task<bool>
+}
+
+interface IGenreService {
+  + GetAllGenresAsync() : Task<IEnumerable<Genre>>
+  + GetGenreByIdAsync(int genreId) : Task<Genre?>
+  + GenreExistsAsync(Genre genre) : Task<bool>
+  + CreateGenreAsync(Genre genre) : Task<int>
+}
+
+' === IMPLEMENTATIONS SERVICES ===
+class UserService
+class MovieService
+class ReviewService
+class PeopleService
+class GenreService
+
+UserService ..|> IUserService
+MovieService ..|> IMovieService
+ReviewService ..|> IReviewService
+PeopleService ..|> IPeopleService
+GenreService ..|> IGenreService
+
+UserService --> IUserRepository
+MovieService --> IMovieRepository
+ReviewService --> IReviewRepository
+PeopleService --> IPeopleRepository
+GenreService --> IGenreRepository
+
+' === LIAISONS ENTRE MODELES, SERVICES ET REPOSITORIES ===
+Users -- UserRepository
+Users -- UserService
+
+Movies -- MovieRepository
+Movies -- MovieService
+
+People -- PeopleRepository
+People -- PeopleService
+
+Genres -- GenreRepository
+Genres -- GenreService
+
+Reviews -- ReviewRepository
+Reviews -- ReviewService
+
+@enduml

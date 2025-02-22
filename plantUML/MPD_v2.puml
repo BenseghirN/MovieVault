@@ -1,0 +1,84 @@
+@startuml MPD
+skinparam linetype ortho
+
+entity "Users" {
+  *UserId : INT <<PK, AUTO_INCREMENT>>
+  --
+  UserName : NVARCHAR(100) <<NOT NULL>>
+  Email : NVARCHAR(255) <<UNIQUE, NOT NULL>>
+  PasswordHash : NVARCHAR(255) <<NOT NULL>>
+  isAdmin : BIT <<DEFAULT 0>>
+}
+
+entity "Movies" {
+  *MovieId : INT <<PK, AUTO_INCREMENT>>
+  --
+  Title : NVARCHAR(255) <<NOT NULL>>
+  ReleaseYear : INT <<CHECK (ReleaseYear >= 1888)>>
+  Duration : INT <<CHECK (Duration > 0)>>
+  Synopsis : TEXT
+  PosterUrl : NVARCHAR(255)
+  TMDBId : INT <<UNIQUE, NULL>>
+}
+
+entity "People" {
+  *PersonId : INT <<PK, AUTO_INCREMENT>>
+  --
+  FirstName : NVARCHAR(100) <<NOT NULL>>
+  LastName : NVARCHAR(100) <<NOT NULL>>
+  BirthDate : DATE
+  Nationality : NVARCHAR(100)
+  PhotoUrl : NVARCHAR(255)
+  TMDBId : INT <<UNIQUE, NULL>>
+}
+
+entity "Genres" {
+  *GenreId : INT <<PK, AUTO_INCREMENT>>
+  --
+  GenreName : NVARCHAR(50) <<UNIQUE, NOT NULL>>
+  TMDBId : INT <<UNIQUE, NULL>>
+}
+
+entity "Reviews" {
+  *ReviewId : INT <<PK, AUTO_INCREMENT>>
+  --
+  UserId : INT <<FK, NOT NULL>>
+  MovieId : INT <<FK, NOT NULL>>
+  Comment : TEXT
+  Rating : INT <<CHECK (Rating BETWEEN 1 AND 5), NOT NULL>>
+  ReviewDate : DATETIME <<DEFAULT CURRENT_TIMESTAMP>>
+}
+
+entity "UserMovies" {
+  *UserId : INT <<PK, FK>>
+  *MovieId : INT <<PK, FK>>
+  --
+  Status : NVARCHAR(100)
+  Owned : BIT <<DEFAULT 0>>
+  AddedDate : DATE <<DEFAULT CURRENT_DATE>>
+  LastWatched : DATE
+}
+
+entity "MoviesPeople" {
+  *MovieId : INT <<PK, FK>>
+  *PersonId : INT <<PK, FK>>
+  --
+  Role : ENUM('Actor', 'Director') <<NOT NULL>>
+}
+
+entity "MoviesGenres" {
+  *MovieId : INT <<PK, FK>>
+  *GenreId : INT <<PK, FK>>
+}
+
+' Relations entre les tables (sans `o{`)
+Users ||--{ Reviews #line.bold;line:Lime;
+Movies ||--{ Reviews #line.bold;line:Cyan;
+Movies ||--{ MoviesPeople #line.bold;line:Purple;
+People ||--{ MoviesPeople #line.bold;line:Orange;
+Movies ||--{ MoviesGenres #line.bold;line:Red;
+Users ||--{ UserMovies #line.bold;
+Movies ||--{ UserMovies #line.bold;line:DeepPink;
+Genres ||--{ MoviesGenres #line.bold;line:DarkOliveGreen;
+
+@enduml
