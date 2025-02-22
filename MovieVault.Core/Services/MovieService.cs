@@ -105,11 +105,11 @@ namespace MovieVault.Core.Services
         }
 
         public async Task<IEnumerable<Movie>> SearchMoviesAsync(
-            string? title,
-            IEnumerable<int>? years,
-            IEnumerable<string>? genres,
-            IEnumerable<string>? directors,
-            IEnumerable<string>? actors)
+            string? title = null,
+            IEnumerable<int>? years = null,
+            IEnumerable<string>? genres = null,
+            IEnumerable<string>? directors = null,
+            IEnumerable<string>? actors = null)
         {
             _logger.LogInformation("Recherche de films avec filtres : Title={title}, Year={years}, Genre={genre}, Directors={directors}, Actors={actors}",
                                     title ?? "N/A",

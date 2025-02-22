@@ -85,7 +85,14 @@ namespace MovieVault.Data.Repositories
 
         public async Task<IEnumerable<Movie>> SearchMoviesAsync(string? title, IEnumerable<int>? years, IEnumerable<string>? genres, IEnumerable<string>? directors, IEnumerable<string>? actors)
         {
-            var query = "SELECT DISTINCT m.* FROM Movies m ";
+            var query = @"SELECT DISTINCT 
+                            m.MovieId, 
+                            m.TMDBId, 
+                            m.ReleaseYear, 
+                            CAST(m.Title AS NVARCHAR(MAX)) AS Title, 
+                            CAST(m.Synopsis AS NVARCHAR(MAX)) AS Synopsis, 
+                            m.PosterUrl
+                        FROM Movies m ";
             var parameters = new List<SqlParameter>();
 
             var joins = QueryBuilder.BuildJoins(genres, directors, actors);

@@ -84,6 +84,7 @@
             linkLabelForgotPassword.TabIndex = 4;
             linkLabelForgotPassword.TabStop = true;
             linkLabelForgotPassword.Text = "Forgot Password?";
+            linkLabelForgotPassword.Visible = false;
             // 
             // titleLabel
             // 

@@ -12,7 +12,7 @@ namespace MovieVault.Core.Interfaces
         Task<IEnumerable<Movie>> GetMoviesByReleaseYearAsync(int year);
         Task<bool> UpdateMovieAsync(Movie movie);
         Task<bool> DeleteMovieAsync(int movieId);
-        Task<IEnumerable<Movie>> SearchMoviesAsync(string? title, IEnumerable<int>? years, IEnumerable<string>? genres, IEnumerable<string>? directors, IEnumerable<string>? actors);
+        Task<IEnumerable<Movie>> SearchMoviesAsync(string? title = null, IEnumerable<int>? years = null, IEnumerable<string>? genres = null, IEnumerable<string>? directors = null, IEnumerable<string>? actors = null);
         Task<bool> MovieExistsAsync(Movie movie, SqlTransaction? transacion = null);
     }
 }

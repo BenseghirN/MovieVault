@@ -21,6 +21,7 @@ namespace MovieVault.UI.Configuration
 
             services.AddTransient<LoginUserControl>();
             services.AddTransient<UserLibraryUserControl>();
+            services.AddTransient<SearchMoviesUserControl>();
 
             return services.BuildServiceProvider();
         }

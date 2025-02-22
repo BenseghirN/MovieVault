@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using MovieVault.Core.Interfaces;
 using MovieVault.Core.Services;
+using MovieVault.Core.TMDB;
 using MovieVault.Data.Models;
 using MovieVault.UI.UserControls;
 
@@ -13,21 +14,30 @@ namespace MovieVault.UI.Forms
 
         private readonly LoginUserControl _loginUserControl;
         private readonly UserLibraryUserControl _userLibraryUserControl;
+        private readonly SearchMoviesUserControl _searchMoviesUserControl;
+
         private readonly ILogger<MainForm> _logger;
         public MainForm(IServiceProvider serviceProvider)
         {
             InitializeComponent();
             _serviceProvider = serviceProvider;
+            
             _loginUserControl = new LoginUserControl(
                 new Action<User>(OnLoginSuccess),
                 serviceProvider.GetRequiredService<IUserService>(),
                 serviceProvider,
                 serviceProvider.GetRequiredService<ILogger<LoginUserControl>>());
+            
             _userLibraryUserControl = new UserLibraryUserControl(
                     _serviceProvider.GetRequiredService<IMovieService>(),
                     _serviceProvider.GetRequiredService<IUserMoviesService>(),
-                    _serviceProvider.GetRequiredService<ILogger<UserLibraryUserControl>>()
-                )
+                    _serviceProvider.GetRequiredService<ILogger<UserLibraryUserControl>>())
+                { Dock = DockStyle.Fill };
+
+            _searchMoviesUserControl = new SearchMoviesUserControl(
+                _serviceProvider.GetRequiredService<IMovieService>(),
+                _serviceProvider.GetRequiredService<ITmdbService>(),
+                _serviceProvider.GetRequiredService<ILogger<SearchMoviesUserControl>>())
                 { Dock = DockStyle.Fill };
         }
 
@@ -58,10 +68,7 @@ namespace MovieVault.UI.Forms
 
             tabPageUserLibrary.Controls.Add(_userLibraryUserControl);
 
-
-
-            //tabControlMain.TabPages.Add(tabPageMovies);
-            //tabControlMain.TabPages.Add(tabPageUsers);
+            tabPageSearch.Controls.Add(_searchMoviesUserControl);
 
             //tabPageUserLibrary.Controls.Add(new HomeControl() { Dock = DockStyle.Fill });
             //tabPageMovies.Controls.Add(new MovieDetailsControl() { Dock = DockStyle.Fill });

@@ -30,91 +30,86 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            tabControlMain = new TabControl();
+            tabPageLogin = new TabPage();
+            tabPageUserLibrary = new TabPage();
+            tabPageSearch = new TabPage();
+            tabPageUsers = new TabPage();
+            tabControlMain.SuspendLayout();
             SuspendLayout();
+            // 
+            // tabControlMain
+            // 
+            tabControlMain.Controls.Add(tabPageLogin);
+            tabControlMain.Controls.Add(tabPageUserLibrary);
+            tabControlMain.Controls.Add(tabPageSearch);
+            tabControlMain.Controls.Add(tabPageUsers);
+            tabControlMain.Dock = DockStyle.Fill;
+            tabControlMain.Location = new Point(0, 0);
+            tabControlMain.Margin = new Padding(3, 4, 3, 4);
+            tabControlMain.Name = "tabControlMain";
+            tabControlMain.SelectedIndex = 0;
+            tabControlMain.Size = new Size(1371, 1067);
+            tabControlMain.TabIndex = 0;
+            // 
+            // tabPageLogin
+            // 
+            tabPageLogin.Location = new Point(4, 29);
+            tabPageLogin.Margin = new Padding(3, 4, 3, 4);
+            tabPageLogin.Name = "tabPageLogin";
+            tabPageLogin.Padding = new Padding(3, 4, 3, 4);
+            tabPageLogin.Size = new Size(1363, 1034);
+            tabPageLogin.TabIndex = 0;
+            tabPageLogin.Text = "Login";
+            tabPageLogin.UseVisualStyleBackColor = true;
+            // 
+            // tabPageUserLibrary
+            // 
+            tabPageUserLibrary.Location = new Point(4, 29);
+            tabPageUserLibrary.Margin = new Padding(3, 4, 3, 4);
+            tabPageUserLibrary.Name = "tabPageUserLibrary";
+            tabPageUserLibrary.Padding = new Padding(3, 4, 3, 4);
+            tabPageUserLibrary.Size = new Size(1363, 1034);
+            tabPageUserLibrary.TabIndex = 1;
+            tabPageUserLibrary.Text = "Accueil";
+            tabPageUserLibrary.UseVisualStyleBackColor = true;
+            // 
+            // tabPageSearch
+            // 
+            tabPageSearch.Location = new Point(4, 29);
+            tabPageSearch.Margin = new Padding(3, 4, 3, 4);
+            tabPageSearch.Name = "tabPageSearch";
+            tabPageSearch.Padding = new Padding(3, 4, 3, 4);
+            tabPageSearch.Size = new Size(1363, 1034);
+            tabPageSearch.TabIndex = 2;
+            tabPageSearch.Text = "Recherche";
+            tabPageSearch.UseVisualStyleBackColor = true;
+            // 
+            // tabPageUsers
+            // 
+            tabPageUsers.Location = new Point(4, 29);
+            tabPageUsers.Margin = new Padding(3, 4, 3, 4);
+            tabPageUsers.Name = "tabPageUsers";
+            tabPageUsers.Padding = new Padding(3, 4, 3, 4);
+            tabPageUsers.Size = new Size(1363, 1034);
+            tabPageUsers.TabIndex = 3;
+            tabPageUsers.Text = "Utilisateurs";
+            tabPageUsers.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1382, 853);
+            ClientSize = new Size(1371, 1067);
+            Controls.Add(tabControlMain);
             Icon = (Icon)resources.GetObject("$this.Icon");
+            Margin = new Padding(3, 4, 3, 4);
             Name = "MainForm";
-            Text = "LoginForm";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Gestion des Films";
+            Load += MainForm_Load;
+            tabControlMain.ResumeLayout(false);
             ResumeLayout(false);
-
-            this.tabControlMain = new System.Windows.Forms.TabControl();
-            this.tabPageLogin = new System.Windows.Forms.TabPage();
-            this.tabPageUserLibrary = new System.Windows.Forms.TabPage();
-            this.tabPageMovies = new System.Windows.Forms.TabPage();
-            this.tabPageUsers = new System.Windows.Forms.TabPage();
-            this.tabControlMain.SuspendLayout();
-            this.SuspendLayout();
-            // 
-            // tabControlMain
-            // 
-            this.tabControlMain.Controls.Add(this.tabPageLogin);
-            this.tabControlMain.Controls.Add(this.tabPageUserLibrary);
-            this.tabControlMain.Controls.Add(this.tabPageMovies);
-            this.tabControlMain.Controls.Add(this.tabPageUsers);
-            this.tabControlMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControlMain.Location = new System.Drawing.Point(0, 0);
-            this.tabControlMain.Name = "tabControlMain";
-            this.tabControlMain.SelectedIndex = 0;
-            this.tabControlMain.Size = new System.Drawing.Size(1200, 800);
-            this.tabControlMain.TabIndex = 0;
-            // 
-            // tabPageLogin
-            // 
-            this.tabPageLogin.Location = new System.Drawing.Point(4, 24);
-            this.tabPageLogin.Name = "tabPageLogin";
-            this.tabPageLogin.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageLogin.Size = new System.Drawing.Size(1192, 772);
-            this.tabPageLogin.TabIndex = 0;
-            this.tabPageLogin.Text = "Login";
-            this.tabPageLogin.UseVisualStyleBackColor = true;
-            // 
-            // tabPageUserLibrary
-            // 
-            this.tabPageUserLibrary.Location = new System.Drawing.Point(4, 24);
-            this.tabPageUserLibrary.Name = "tabPageUserLibrary";
-            this.tabPageUserLibrary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageUserLibrary.Size = new System.Drawing.Size(1192, 772);
-            this.tabPageUserLibrary.TabIndex = 1;
-            this.tabPageUserLibrary.Text = "Accueil";
-            this.tabPageUserLibrary.UseVisualStyleBackColor = true;
-            // 
-            // tabPageMovies
-            // 
-            this.tabPageMovies.Location = new System.Drawing.Point(4, 24);
-            this.tabPageMovies.Name = "tabPageMovies";
-            this.tabPageMovies.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageMovies.Size = new System.Drawing.Size(1192, 772);
-            this.tabPageMovies.TabIndex = 2;
-            this.tabPageMovies.Text = "Films";
-            this.tabPageMovies.UseVisualStyleBackColor = true;
-            // 
-            // tabPageUsers
-            // 
-            this.tabPageUsers.Location = new System.Drawing.Point(4, 24);
-            this.tabPageUsers.Name = "tabPageUsers";
-            this.tabPageUsers.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageUsers.Size = new System.Drawing.Size(1192, 772);
-            this.tabPageUsers.TabIndex = 3;
-            this.tabPageUsers.Text = "Utilisateurs";
-            this.tabPageUsers.UseVisualStyleBackColor = true;
-            // 
-            // MainForm
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1200, 800);
-            this.Controls.Add(this.tabControlMain);
-            this.Name = "MainForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Gestion des Films";
-            this.Load += new System.EventHandler(this.MainForm_Load);
-            this.tabControlMain.ResumeLayout(false);
-            this.ResumeLayout(false);
         }
 
         #endregion
@@ -122,7 +117,7 @@
         private System.Windows.Forms.TabControl tabControlMain;
         private System.Windows.Forms.TabPage tabPageLogin;
         private System.Windows.Forms.TabPage tabPageUserLibrary;
-        private System.Windows.Forms.TabPage tabPageMovies;
+        private System.Windows.Forms.TabPage tabPageSearch;
         private System.Windows.Forms.TabPage tabPageUsers;
     }
 }
