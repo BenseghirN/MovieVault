@@ -1,0 +1,79 @@
+@startuml MLD
+skinparam linetype ortho
+skinparam nodesep 2.0
+skinparam ranksep 1.5
+
+entity "Utilisateur" {
+  --
+  UserName
+  Email
+  Password
+}
+
+entity "Movies" {
+  --
+  Title
+  ReleaseYear
+  Duration
+  Synopsis
+}
+
+entity "People" {
+  --
+  FirstName
+  LastName
+  BirthDate
+  Nationality
+}
+
+entity "Genres" {
+  --
+  GenreName
+}
+
+entity "Reviews" {
+  --
+  User
+  Comment
+  Rating
+  ReviewDate
+  Movie
+}
+
+entity "UserMovies" {
+  --
+  User 
+  Movie
+  Status
+  Owned
+  AddedDate
+  LastWatched
+}
+
+entity "MoviesPeople" {
+  --
+  Person
+  Movie
+  Role
+}
+
+entity "MoviesGenres" {
+  --
+  Movie
+  Genre
+}
+
+' Associations avec cardinalités sans labels de jointure
+Utilisateur ||--{ Reviews : "1,N"
+Movies ||--{ Reviews : "1,N"
+
+Utilisateur ||--{ UserMovies : "1,N"
+Movies ||--{ UserMovies : "1,N"
+
+People ||--{ MoviesPeople : "1,N"
+Movies ||--{ MoviesPeople : "1,N"
+
+Movies ||--{ MoviesGenres : "1,N"
+Genres ||--{ MoviesGenres : "1,N"
+
+@enduml

@@ -1,0 +1,42 @@
+@startuml MCD
+skinparam linetype ortho
+
+entity "Utilisateur" as Users {
+  UserName
+  Email
+}
+
+entity "Film" as Movies {
+  Title
+  ReleaseYear
+  Duration
+  Synopsis
+}
+
+entity "Personne" as People {
+  FirstName
+  LastName
+  BirthDate
+  Nationality
+}
+
+entity "Genre" as Genres {
+  GenreName
+}
+
+entity "Critique" as Reviews {
+  Comment
+  Rating
+  ReviewDate
+}
+
+' Associations avec `{` partout pour respecter les cardinalités 1,N
+Users ||--{ Reviews : "1,N\nrédige"
+Reviews }--{ Movies : "1,N\nest jugé par"
+
+People }--{ Movies : "N,N\njoue dans"
+Movies }--{ Genres : "N,N\nclassé sous"
+
+Users }--{ Movies : "N,N\nPossède/A vu"
+
+@enduml
