@@ -33,6 +33,7 @@
             flowLayoutPanelMovies = new FlowLayoutPanel();
             labelUsername = new Label();
             noMoviesLabel = new Label();
+            buttonRefresh = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBoxLogo).BeginInit();
             SuspendLayout();
             // 
@@ -87,11 +88,22 @@
             noMoviesLabel.Text = "Pas de films dans votre bibliotheque";
             noMoviesLabel.Visible = false;
             // 
+            // buttonRefresh
+            // 
+            buttonRefresh.Location = new Point(167, 121);
+            buttonRefresh.Name = "buttonRefresh";
+            buttonRefresh.Size = new Size(100, 30);
+            buttonRefresh.TabIndex = 4;
+            buttonRefresh.Text = "Rafraîchir";
+            buttonRefresh.UseVisualStyleBackColor = true;
+            buttonRefresh.Click += buttonRefresh_Click;
+            // 
             // UserLibraryUserControl
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
+            Controls.Add(buttonRefresh);
             Controls.Add(noMoviesLabel);
             Controls.Add(pictureBoxLogo);
             Controls.Add(labelUsername);
@@ -114,5 +126,6 @@
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelMovies;
         private System.Windows.Forms.PictureBox pictureBoxLogo;
         private System.Windows.Forms.Label noMoviesLabel;
+        private System.Windows.Forms.Button buttonRefresh;
     }
 }

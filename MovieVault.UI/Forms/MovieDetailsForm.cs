@@ -4,6 +4,7 @@ using MovieVault.Core.Services;
 using MovieVault.Core.TMDB;
 using MovieVault.Data.Models;
 using MovieVault.UI.UserControls;
+using System.Collections.Generic;
 
 namespace MovieVault.UI.Forms
 {
@@ -13,16 +14,24 @@ namespace MovieVault.UI.Forms
         private readonly ITmdbService _tmdbService;
         private readonly IReviewService _reviewService;
         private readonly IMovieManagerService _movieManagerService;
+        private readonly IUserMoviesService _userMoviesService;
         private readonly ILogger<MovieDetailsForm> _logger;
         private Movie? _movieForView;
-        public MovieDetailsForm(IMovieDetailsService movieDetailsService, ITmdbService tmdbService, ILogger<MovieDetailsForm> logger, IReviewService reviewService, IMovieManagerService movieManagerService)
+        public MovieDetailsForm(
+            IMovieDetailsService movieDetailsService,
+            ITmdbService tmdbService,
+            IUserMoviesService userMoviesService,
+            IReviewService reviewService,
+            IMovieManagerService movieManagerService,
+            ILogger<MovieDetailsForm> logger)
         {
             InitializeComponent();
             _movieDetailsService = movieDetailsService;
             _tmdbService = tmdbService;
-            _logger = logger;
             _reviewService = reviewService;
             _movieManagerService = movieManagerService;
+            _userMoviesService = userMoviesService;
+            _logger = logger;
         }
 
         public async Task LoadMovieDetails(Movie movie)
@@ -50,6 +59,8 @@ namespace MovieVault.UI.Forms
             }
             var actors = _movieForView.People?.Where(p => p.Role == PersonRole.Actor);
             DisplayActors(actors);
+            var isInUserLibrary = await CheckUserLibraryStatus(UserSession.CurrentUser.UserId, _movieForView.MovieId);
+            HideOfShowControls(isInUserLibrary);
         }
 
         private async Task LoadCastAndCrew(Movie movie)
@@ -163,6 +174,24 @@ namespace MovieVault.UI.Forms
             listBoxReviews.DataSource = reviewsBindingSource;
         }
 
+        private async Task<bool> CheckUserLibraryStatus(int userId, int movieId)
+        {
+            var userMovie = await _userMoviesService.GetUserMovieByIdAsync(userId, movieId);
+
+            return userMovie != null;
+        }
+
+        private void HideOfShowControls(bool isInUserLibrary)
+        {
+            panelRating.Enabled = isInUserLibrary;
+            textBoxComment.Enabled = isInUserLibrary;
+            buttonSubmitReview.Enabled = isInUserLibrary;
+
+            // Afficher le bon bouton
+            buttonAddToLibrary.Visible = !isInUserLibrary;
+            buttonRemoveFromLibrary.Visible = isInUserLibrary;
+        }
+
         private async void buttonAddToLibrary_Click(object sender, EventArgs e)
         {
             _logger.LogInformation("Adding movie with Title {movieTitle} into collection for user with id {userId}", _movieForView.Title, UserSession.CurrentUser.UserId);
@@ -177,8 +206,56 @@ namespace MovieVault.UI.Forms
             }
             catch (Exception ex)
             {
-                _logger.LogInformation("Error Adding movie with Title {movieTitle} into collection for user with id {userId}", _movieForView.Title, UserSession.CurrentUser.UserId);
+                _logger.LogError("Error Adding movie with Title {movieTitle} into collection for user with id {userId}", _movieForView.Title, UserSession.CurrentUser.UserId);
                 MessageBox.Show("Erreur lors de l'ajout du film dans la bibliotheque", "Alerte", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                throw;
+            }
+        }
+
+        private async void buttonSubmitReview_Click(object sender, EventArgs e)
+        {
+            _logger.LogInformation("adding a reviw for movie with title {movieTitle} from user {userId}",
+                _movieForView.Title, UserSession.CurrentUser.UserId);
+            try
+            {
+                var review = new Review
+                {
+                    MovieId = _movieForView.MovieId,
+                    UserId = UserSession.CurrentUser.UserId,
+                    Comment = textBoxComment.Text
+                };
+                var insertReview = await _reviewService.CreateReviewAsync(review);
+                if (insertReview > 0)
+                {
+                    _logger.LogInformation("Review added succefully for movie with title {movieTitle} from user {userId}", _movieForView.Title, UserSession.CurrentUser.UserId);
+                    MessageBox.Show("Commentaire ajouté avec succès.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError("Error adding review for movie with title {movieTitle} from user {userId}", _movieForView.Title, UserSession.CurrentUser.UserId);
+                MessageBox.Show("Erreur lors de l'ajout du film dans la bibliotheque", "Alerte", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                throw;
+            }
+        }
+
+        private async void buttonRemoveFromLibrary_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _logger.LogInformation("Removing movie with title {movieTitle} from user {userId} collection",
+                    _movieForView.MovieId, UserSession.CurrentUser.UserId);
+                var remove = await _userMoviesService.RemoveMovieFromUserAsync(UserSession.CurrentUser.UserId,
+                    _movieForView.MovieId);
+                if (remove)
+                {
+                    MessageBox.Show("Film retiré avec succès.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger.LogInformation("Error removing movie with Title {movieTitle} from collection for user with id {userId}", _movieForView.Title, UserSession.CurrentUser.UserId);
+                MessageBox.Show("Erreur lors de la supression du film de la bibliotheque", "Alerte", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 throw;
             }
         }

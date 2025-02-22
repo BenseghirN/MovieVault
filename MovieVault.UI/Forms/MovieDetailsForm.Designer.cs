@@ -164,6 +164,7 @@
             buttonSubmitReview.Size = new Size(100, 30);
             buttonSubmitReview.TabIndex = 8;
             buttonSubmitReview.Text = "Valider";
+            buttonSubmitReview.Click += buttonSubmitReview_Click;
             // 
             // textBoxComment
             // 
@@ -190,6 +191,7 @@
             buttonRemoveFromLibrary.TabIndex = 11;
             buttonRemoveFromLibrary.Text = "Retirer de ma bibliothèque";
             buttonRemoveFromLibrary.Visible = false;
+            buttonRemoveFromLibrary.Click += buttonRemoveFromLibrary_Click;
             // 
             // buttonBack
             // 

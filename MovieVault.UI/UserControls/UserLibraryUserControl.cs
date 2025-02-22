@@ -80,5 +80,12 @@ namespace MovieVault.UI.UserControls
         {
             await LoadUserMovies();
         }
+
+        private async void buttonRefresh_Click(object sender, EventArgs e)
+        {
+            _logger.LogInformation("Refreshing user movie collection...");
+            flowLayoutPanelMovies.Controls.Clear();
+            await LoadUserMovies();
+        }
     }
 }

@@ -19,8 +19,8 @@ namespace MovieVault.Data.Repositories
             {
                 new SqlParameter("@UserId", review.UserId),
                 new SqlParameter("@MovieId", review.MovieId),
-                new SqlParameter("@Rating", review.Rating),
-                new SqlParameter("@Comment", review.Comment)
+                new SqlParameter("@Rating", review.Rating ?? (object)DBNull.Value),
+                new SqlParameter("@Comment", review.Comment ?? (object)DBNull.Value)
             };
 
             var reviewId = await _dbHelper.ExecuteScalarAsync(query, parameters);
