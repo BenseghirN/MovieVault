@@ -47,6 +47,7 @@ Elle repose sur **WinForms** pour l'interface utilisateur, **SQL Server** pour l
 ```bash
 git clone https://github.com/username/MovieVault.git
 cd MovieVault-Solution
+git checkout dev
 ```
 
 ### 3️⃣ Lancer la base de données avec Docker
@@ -56,7 +57,7 @@ docker-compose up --build -d
 
 ### 4️⃣ Vérifier la connexion SQL
 ```bash
-docker exec -it movievault-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P 'password123!' -Q "SELECT name FROM sys.databases;"
+docker exec -it movievault-db /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P 'K]xr!9*a>sPw' -Q "SELECT name FROM sys.databases;"
 ```
 
 ### 5️⃣ Lancer l'application
