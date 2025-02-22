@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MovieVault.Core.Interfaces;
-using MovieVault.Core.Services;
 using MovieVault.Data.Models;
 using MovieVault.UI.Forms;
 
@@ -50,7 +49,6 @@ namespace MovieVault.UI.UserControls
                 if (userLogged != null)
                 {
                     _logger.LogInformation("User with mail {userMail} succefully logged in", mail);
-                    MessageBox.Show($"Bienvenue {userLogged.UserName}", "Connexion réussie", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
                     _onLoginSuccess?.Invoke(userLogged);
                 }
             }

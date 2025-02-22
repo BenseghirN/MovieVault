@@ -7,7 +7,7 @@ namespace MovieVault.Core.Services
 {
     public class InsertNewMovieService : IMovieManagerService
     {
-        private readonly IDBHelper _dbHelper;
+        private readonly IDatabaseConnection _dbHelper;
         private readonly IMovieService _movieService;
         private readonly IUserMoviesService _userMoviesService;
         private readonly IGenreService _genreService;
@@ -16,7 +16,7 @@ namespace MovieVault.Core.Services
         private readonly IMoviesPeopleService _moviePeopleService;
         private readonly ILogger<InsertNewMovieService> _logger;
         public InsertNewMovieService(
-            IDBHelper dBHelper,
+            IDatabaseConnection dBHelper,
             IMovieService movieService,
             IUserMoviesService userMoviesService,
             IGenreService genreService,

@@ -2,7 +2,6 @@ using Microsoft.Extensions.Logging;
 using MovieVault.Core.Interfaces;
 using MovieVault.Data.Interfaces;
 using MovieVault.Data.Models;
-using MovieVault.Data.Repositories;
 
 namespace MovieVault.Core.Services
 {

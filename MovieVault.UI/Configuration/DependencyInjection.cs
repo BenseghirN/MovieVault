@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MovieVault.UI.Forms;
 using MovieVault.UI.UserControls;
-using Serilog;
 
 namespace MovieVault.UI.Configuration
 {
@@ -21,6 +20,7 @@ namespace MovieVault.UI.Configuration
             services.AddTransient<RegisterForm>();
 
             services.AddTransient<LoginUserControl>();
+            services.AddTransient<UserLibraryUserControl>();
 
             return services.BuildServiceProvider();
         }

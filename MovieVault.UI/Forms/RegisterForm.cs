@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic.ApplicationServices;
 using MovieVault.Core.Interfaces;
 using User = MovieVault.Data.Models.User;
 
@@ -62,12 +61,12 @@ namespace MovieVault.UI.Forms
                     this.Close();
                 }
             }
-            catch (ArgumentException ex) 
+            catch (ArgumentException ex)
             {
                 _logger.LogWarning("Validation error: {message}", ex.Message);
                 MessageBox.Show("Veuillez remplir tous les champs.", "Alerte", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-            catch (InvalidOperationException ex) 
+            catch (InvalidOperationException ex)
             {
                 _logger.LogWarning("Conflit utilisateur: {message}", ex.Message);
                 MessageBox.Show(ex.Message, "Conflit utilisateur", MessageBoxButtons.OK, MessageBoxIcon.Warning);

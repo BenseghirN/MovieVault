@@ -7,7 +7,7 @@ namespace MovieVault.Data.Interfaces
     {
         Task<SqlConnection> OpenConnectionAsync();
         Task CloseConnectionAsync(SqlConnection connection);
-        Task<SqlTransaction> BeginTransactionAsync(SqlConnection connection);
+        //Task<SqlTransaction> BeginTransactionAsync(SqlConnection connection);
 
         Task<int> ExecuteQueryAsync(string query, params SqlParameter[] parameters);
         Task<int> ExecuteQueryAsync(string query, SqlTransaction transaction, params SqlParameter[] parameters);

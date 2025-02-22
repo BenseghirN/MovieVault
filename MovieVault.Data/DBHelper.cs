@@ -30,14 +30,14 @@ namespace MovieVault.Data
             }
         }
 
-        public async Task<SqlTransaction> BeginTransactionAsync(SqlConnection connection)
-        {
-            if (connection == null || connection.State != ConnectionState.Open)
-                throw new InvalidOperationException("Cannot start a transaction on a closed connection.");
+        //public async Task<SqlTransaction> BeginTransactionAsync(SqlConnection connection)
+        //{
+        //    if (connection == null || connection.State != ConnectionState.Open)
+        //        throw new InvalidOperationException("Cannot start a transaction on a closed connection.");
 
-            _logger.LogInformation("Starting SQL Transaction...");
-            return await _databaseConnection.BeginTransactionAsync(connection);
-        }
+        //    _logger.LogInformation("Starting SQL Transaction...");
+        //    return await _databaseConnection.BeginTransactionAsync(connection);
+        //}
 
         // For SQL `INSERT`, `UPDATE`, `DELETE`
         public async Task<int> ExecuteQueryAsync(string query, params SqlParameter[] parameters)
@@ -62,7 +62,7 @@ namespace MovieVault.Data
                 isNewConnection = true;
             }
 
-            var localTransaction = transaction ?? await BeginTransactionAsync(connection);
+            var localTransaction = transaction ?? await _databaseConnection.BeginTransactionAsync(connection);
             isNewTransaction = transaction == null;
 
             try
@@ -116,7 +116,7 @@ namespace MovieVault.Data
                 isNewConnection = true;
             }
 
-            var localTransaction = transaction ?? await BeginTransactionAsync(connection);
+            var localTransaction = transaction ?? await _databaseConnection.BeginTransactionAsync(connection);
             isNewTransaction = transaction == null;
 
             try
@@ -178,7 +178,7 @@ namespace MovieVault.Data
                 isNewConnection = true;
             }
 
-            var localTransaction = transaction ?? await BeginTransactionAsync(connection);
+            var localTransaction = transaction ?? await _databaseConnection.BeginTransactionAsync(connection);
             isNewTransaction = transaction == null;
 
             try

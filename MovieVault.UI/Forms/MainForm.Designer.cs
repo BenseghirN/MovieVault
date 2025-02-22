@@ -44,7 +44,7 @@
 
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPageLogin = new System.Windows.Forms.TabPage();
-            this.tabPageHome = new System.Windows.Forms.TabPage();
+            this.tabPageUserLibrary = new System.Windows.Forms.TabPage();
             this.tabPageMovies = new System.Windows.Forms.TabPage();
             this.tabPageUsers = new System.Windows.Forms.TabPage();
             this.tabControlMain.SuspendLayout();
@@ -53,7 +53,7 @@
             // tabControlMain
             // 
             this.tabControlMain.Controls.Add(this.tabPageLogin);
-            this.tabControlMain.Controls.Add(this.tabPageHome);
+            this.tabControlMain.Controls.Add(this.tabPageUserLibrary);
             this.tabControlMain.Controls.Add(this.tabPageMovies);
             this.tabControlMain.Controls.Add(this.tabPageUsers);
             this.tabControlMain.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -73,15 +73,15 @@
             this.tabPageLogin.Text = "Login";
             this.tabPageLogin.UseVisualStyleBackColor = true;
             // 
-            // tabPageHome
+            // tabPageUserLibrary
             // 
-            this.tabPageHome.Location = new System.Drawing.Point(4, 24);
-            this.tabPageHome.Name = "tabPageHome";
-            this.tabPageHome.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageHome.Size = new System.Drawing.Size(1192, 772);
-            this.tabPageHome.TabIndex = 1;
-            this.tabPageHome.Text = "Accueil";
-            this.tabPageHome.UseVisualStyleBackColor = true;
+            this.tabPageUserLibrary.Location = new System.Drawing.Point(4, 24);
+            this.tabPageUserLibrary.Name = "tabPageUserLibrary";
+            this.tabPageUserLibrary.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageUserLibrary.Size = new System.Drawing.Size(1192, 772);
+            this.tabPageUserLibrary.TabIndex = 1;
+            this.tabPageUserLibrary.Text = "Accueil";
+            this.tabPageUserLibrary.UseVisualStyleBackColor = true;
             // 
             // tabPageMovies
             // 
@@ -121,7 +121,7 @@
 
         private System.Windows.Forms.TabControl tabControlMain;
         private System.Windows.Forms.TabPage tabPageLogin;
-        private System.Windows.Forms.TabPage tabPageHome;
+        private System.Windows.Forms.TabPage tabPageUserLibrary;
         private System.Windows.Forms.TabPage tabPageMovies;
         private System.Windows.Forms.TabPage tabPageUsers;
     }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MovieVault.Core.Interfaces;
+using MovieVault.Core.Services;
 using MovieVault.Data.Models;
 using MovieVault.UI.UserControls;
 
@@ -8,16 +9,26 @@ namespace MovieVault.UI.Forms
 {
     public partial class MainForm : Form
     {
+        private readonly IServiceProvider _serviceProvider;
+
         private readonly LoginUserControl _loginUserControl;
+        private readonly UserLibraryUserControl _userLibraryUserControl;
         private readonly ILogger<MainForm> _logger;
         public MainForm(IServiceProvider serviceProvider)
         {
             InitializeComponent();
+            _serviceProvider = serviceProvider;
             _loginUserControl = new LoginUserControl(
                 new Action<User>(OnLoginSuccess),
                 serviceProvider.GetRequiredService<IUserService>(),
                 serviceProvider,
                 serviceProvider.GetRequiredService<ILogger<LoginUserControl>>());
+            _userLibraryUserControl = new UserLibraryUserControl(
+                    _serviceProvider.GetRequiredService<IMovieService>(),
+                    _serviceProvider.GetRequiredService<IUserMoviesService>(),
+                    _serviceProvider.GetRequiredService<ILogger<UserLibraryUserControl>>()
+                )
+                { Dock = DockStyle.Fill };
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -31,23 +42,32 @@ namespace MovieVault.UI.Forms
             );
 
             // Supprimer les autres onglets au démarrage
-            tabControlMain.TabPages.Remove(tabPageHome);
-            tabControlMain.TabPages.Remove(tabPageMovies);
-            tabControlMain.TabPages.Remove(tabPageUsers);
+            tabControlMain.TabPages.Remove(tabPageUserLibrary);
+            //tabControlMain.TabPages.Remove(tabPageMovies);
+            //tabControlMain.TabPages.Remove(tabPageUsers);
         }
 
         public void OnLoginSuccess(User user)
         {
-            tabControlMain.TabPages.Remove(tabPageLogin); // Supprimer l'onglet Login
-            tabControlMain.TabPages.Add(tabPageHome);
-            tabControlMain.TabPages.Add(tabPageMovies);
-            tabControlMain.TabPages.Add(tabPageUsers);
+            UserSession.SetUser(user);
+            MessageBox.Show($"Bienvenue {user.UserName}", "Connexion réussie", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
 
-            //tabPageHome.Controls.Add(new HomeControl() { Dock = DockStyle.Fill });
+            tabControlMain.TabPages.Remove(tabPageLogin);
+
+            tabControlMain.TabPages.Add(tabPageUserLibrary);
+
+            tabPageUserLibrary.Controls.Add(_userLibraryUserControl);
+
+
+
+            //tabControlMain.TabPages.Add(tabPageMovies);
+            //tabControlMain.TabPages.Add(tabPageUsers);
+
+            //tabPageUserLibrary.Controls.Add(new HomeControl() { Dock = DockStyle.Fill });
             //tabPageMovies.Controls.Add(new MovieDetailsControl() { Dock = DockStyle.Fill });
             //tabPageUsers.Controls.Add(new UserManagementControl() { Dock = DockStyle.Fill });
 
-            tabControlMain.SelectedTab = tabPageHome;
+            tabControlMain.SelectedTab = tabPageUserLibrary;
         }
 
     }

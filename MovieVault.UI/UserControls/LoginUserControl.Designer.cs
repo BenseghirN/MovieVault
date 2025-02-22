@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LoginUserControl));
             pictureBoxLogo = new PictureBox();
             textBoxEmail = new TextBox();
             textBoxPassword = new TextBox();
@@ -42,7 +41,7 @@
             // pictureBoxLogo
             // 
             pictureBoxLogo.BackColor = Color.Gray;
-            pictureBoxLogo.Image = (Image)resources.GetObject("pictureBoxLogo.Image");
+            pictureBoxLogo.Image = Properties.Resources.MainLogo;
             pictureBoxLogo.Location = new Point(297, 66);
             pictureBoxLogo.Name = "pictureBoxLogo";
             pictureBoxLogo.Size = new Size(200, 200);

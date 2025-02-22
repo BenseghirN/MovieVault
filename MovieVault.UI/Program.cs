@@ -1,8 +1,7 @@
-﻿using System.Data.SqlClient;
-using System.Diagnostics;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using MovieVault.UI.Configuration;
 using MovieVault.UI.Forms;
+using System.Diagnostics;
 
 namespace MovieVault.UI
 {
