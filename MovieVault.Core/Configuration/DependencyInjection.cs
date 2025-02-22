@@ -25,6 +25,7 @@ namespace MovieVault.Core.Configuration
             services.AddSingleton<IUserMoviesService, UserMovieService>();
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<ITmdbService, TmdbService>();
+            services.AddSingleton<IMovieDetailsService, MovieDetailsService>();
 
             services.AddLogging();
         }

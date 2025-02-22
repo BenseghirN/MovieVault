@@ -2,9 +2,9 @@ using MovieVault.Data.Models;
 
 namespace MovieVault.Core.Interfaces
 {
-    public interface IMovieDetails
+    public interface IMovieDetailsService
     {
-        Task<Movie> GetMovieDetailsForViewAsync(int movidId);
+        Task<Movie> GetMovieDetailsForViewAsync(int movieId);
         Task<List<Person>> GetMovieCastAndCrewForViewAsync(int movieId);
     }
 }

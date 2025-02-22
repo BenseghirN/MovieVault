@@ -17,7 +17,7 @@ namespace MovieVault.UI
             var serviceProvider = DependencyInjection.ConfigureServices();
 
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1(serviceProvider.GetRequiredService<ITmdbService>()));
+            Application.Run(new MainForm(serviceProvider.GetRequiredService<ITmdbService>()));
         }
     }
 }
