@@ -18,6 +18,7 @@ namespace MovieVault.UI.Configuration
 
             services.AddTransient<MainForm>();
             services.AddTransient<RegisterForm>();
+            services.AddTransient<MovieDetailsForm>();
 
             services.AddTransient<LoginUserControl>();
             services.AddTransient<UserLibraryUserControl>();

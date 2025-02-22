@@ -12,18 +12,21 @@ namespace MovieVault.Core.Services
         private readonly IGenreRepository _genreRepository;
         private readonly IPeopleRepository _peopleRepository;
         private readonly IMoviesPeopleRepository _moviesPeopleRepository;
+        private readonly IMoviesGenresRepository _moviesGenresRepository;
         public MovieDetailsService(
             ILogger<MovieDetailsService> logger,
             IMovieRepository movieRepository,
             IGenreRepository genreRepository,
             IPeopleRepository peopleRepository,
-            IMoviesPeopleRepository moviesPeopleRepository)
+            IMoviesPeopleRepository moviesPeopleRepository,
+            IMoviesGenresRepository moviesGenresRepository)
         {
             _logger = logger;
             _movieRepository = movieRepository;
             _genreRepository = genreRepository;
             _peopleRepository = peopleRepository;
             _moviesPeopleRepository = moviesPeopleRepository;
+            _moviesGenresRepository = moviesGenresRepository;
         }
 
         public async Task<List<Person>> GetMovieCastAndCrewForViewAsync(int movieId)
@@ -44,7 +47,13 @@ namespace MovieVault.Core.Services
                 var castAndCrew = new HashSet<Person>();
                 foreach (var pers in moviePeople)
                 {
-                    castAndCrew.Add(await _peopleRepository.GetPersonByIdAsync(pers.PersonId));
+                    var person = await _peopleRepository.GetPersonByIdAsync(pers.PersonId);
+                    if (pers.Role == PersonRole.Director)
+                    {
+                        person.Role = PersonRole.Director;
+                    }
+                    else person.Role = PersonRole.Actor;
+                    castAndCrew.Add(person);
                 }
                 return castAndCrew.ToList();
             }
@@ -66,7 +75,10 @@ namespace MovieVault.Core.Services
                 return null;
             }
 
-            foreach (var item in movie.MoviesGenres)
+            var genre = await _moviesGenresRepository.GetMoviesGenresByMovieAsync(movie.MovieId);
+            movie.Genres = new List<Genre>();
+            movie.People = new List<Person>();
+            foreach (var item in genre)
             {
                 movie.Genres.Add(await _genreRepository.GetGenreByIdAsync(item.GenreId));
             }

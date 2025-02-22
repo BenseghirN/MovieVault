@@ -40,10 +40,10 @@ namespace MovieVault.Core.Services
         {
             _logger.LogInformation("Attempting to initiate movie creation process with movie {movieTitle}", movie.Title);
 
-            var connection = await _dbHelper.OpenConnectionAsync();
-            var transaction = await _dbHelper.BeginTransactionAsync(connection);
+            //var connection = await _dbHelper.OpenConnectionAsync();
+            //var transaction = await _dbHelper.BeginTransactionAsync(connection);
 
-            if (await _movieService.MovieExistsAsync(movie, transaction))
+            if (await _movieService.MovieExistsAsync(movie))
             {
                 _logger.LogInformation("Movie '{movieTitle}' already exists in the database. Linking it to User {userId}.", movie.Title, userId);
                 return await LinkMovieToUserAsync(movie.MovieId, userId); // Movie already exists in DB, simply link to user
@@ -52,7 +52,7 @@ namespace MovieVault.Core.Services
             _logger.LogInformation("Movie '{movieTitle}' does not exist in the database. Proceeding with creation.", movie.Title);
             // Movie doesn't exist, starting process to add in DB
             // 1 INSERT MOVIE
-            int movieId = await _movieService.CreateMovieAsync(movie, transaction);
+            int movieId = await _movieService.CreateMovieAsync(movie);
             movie.MovieId = movieId;
 
             _logger.LogInformation("Movie '{movieTitle}' inserted, proceeding with genres.", movie.Title);
@@ -71,15 +71,15 @@ namespace MovieVault.Core.Services
             _logger.LogInformation("Links done, linking Movie {movieTitle} with User {userId}.", movieId, userId);
             // 5 LINK MOVIE TO USER
             var result = await LinkMovieToUserAsync(movie.MovieId, userId);
-            if (!result)
-            {
-                transaction.Rollback();
-                connection.Close();
-                return result;
-            }
+            //if (!result)
+            //{
+            //    transaction.Rollback();
+            //    connection.Close();
+            //    return result;
+            //}
 
-            transaction.Commit();
-            connection.Close();
+            //transaction.Commit();
+            //connection.Close();
             return result;
         }
 

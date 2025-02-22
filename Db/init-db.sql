@@ -14,7 +14,8 @@ CREATE TABLE Users (
     UserId INT IDENTITY(1,1) PRIMARY KEY,
     UserName NVARCHAR(100) NOT NULL,
     Email NVARCHAR(255) NOT NULL UNIQUE,
-    PasswordHash NVARCHAR(255) NOT NULL
+    PasswordHash NVARCHAR(255) NOT NULL,
+    isAdmin BIT DEFAULT 0 
 );
 GO
 
@@ -97,4 +98,8 @@ CREATE TABLE Reviews (
     FOREIGN KEY (UserId) REFERENCES Users(UserId) ON DELETE CASCADE,
     FOREIGN KEY (MovieId) REFERENCES Movies(MovieId) ON DELETE CASCADE
 );
+GO
+-- Insertion d'un utilisateur administrateur par défaut
+INSERT INTO Users (UserName, Email, PasswordHash, isAdmin)
+VALUES ('admin', 'admin', '$2a$12$.d3g5XfZHGkfgI5phqGUc.cWJeriV6VwkKz2DaAWMcCL5o0ELeR.y', 1);
 GO

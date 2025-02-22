@@ -21,24 +21,26 @@ namespace MovieVault.UI.Forms
         {
             InitializeComponent();
             _serviceProvider = serviceProvider;
-            
+
             _loginUserControl = new LoginUserControl(
                 new Action<User>(OnLoginSuccess),
                 serviceProvider.GetRequiredService<IUserService>(),
                 serviceProvider,
                 serviceProvider.GetRequiredService<ILogger<LoginUserControl>>());
-            
+
             _userLibraryUserControl = new UserLibraryUserControl(
                     _serviceProvider.GetRequiredService<IMovieService>(),
                     _serviceProvider.GetRequiredService<IUserMoviesService>(),
-                    _serviceProvider.GetRequiredService<ILogger<UserLibraryUserControl>>())
-                { Dock = DockStyle.Fill };
+                    _serviceProvider.GetRequiredService<ILogger<UserLibraryUserControl>>(),
+                    serviceProvider)
+            { Dock = DockStyle.Fill };
 
             _searchMoviesUserControl = new SearchMoviesUserControl(
                 _serviceProvider.GetRequiredService<IMovieService>(),
                 _serviceProvider.GetRequiredService<ITmdbService>(),
-                _serviceProvider.GetRequiredService<ILogger<SearchMoviesUserControl>>())
-                { Dock = DockStyle.Fill };
+                _serviceProvider.GetRequiredService<ILogger<SearchMoviesUserControl>>(),
+                serviceProvider)
+            { Dock = DockStyle.Fill };
         }
 
         private void MainForm_Load(object sender, EventArgs e)

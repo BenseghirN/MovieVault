@@ -8,11 +8,14 @@ namespace MovieVault.UI.UserControls
     public partial class UserLibraryUserControl : UserControl
     {
         private readonly IUserMoviesService _userMoviesService;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IMovieService _movieService;
         private readonly ILogger<UserLibraryUserControl> _logger;
-        public UserLibraryUserControl(IMovieService movieService, IUserMoviesService userMoviesService, ILogger<UserLibraryUserControl> logger)
+        public UserLibraryUserControl(IMovieService movieService, IUserMoviesService userMoviesService,
+            ILogger<UserLibraryUserControl> logger, IServiceProvider serviceProvider)
         {
             InitializeComponent();
+            _serviceProvider = serviceProvider;
             _movieService = movieService;
             _userMoviesService = userMoviesService;
             _logger = logger;
@@ -68,7 +71,7 @@ namespace MovieVault.UI.UserControls
             flowLayoutPanelMovies.Controls.Clear();
             foreach (var movie in movies)
             {
-                var movieControl = new MovieThumbnailUserControl(movie);
+                var movieControl = new MovieThumbnailUserControl(movie, _serviceProvider);
                 flowLayoutPanelMovies.Controls.Add(movieControl);
             }
         }

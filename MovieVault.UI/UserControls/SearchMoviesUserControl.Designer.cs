@@ -83,6 +83,7 @@ namespace MovieVault.UI.UserControls
             textBoxSearch.PlaceholderText = "Titre du film";
             textBoxSearch.Size = new Size(400, 34);
             textBoxSearch.TabIndex = 7;
+            textBoxSearch.KeyDown += textBoxSearch_KeyDown;
             // 
             // buttonSearch
             // 

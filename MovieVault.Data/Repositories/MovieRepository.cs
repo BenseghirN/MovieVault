@@ -87,11 +87,12 @@ namespace MovieVault.Data.Repositories
         {
             var query = @"SELECT DISTINCT 
                             m.MovieId, 
-                            m.TMDBId, 
-                            m.ReleaseYear, 
-                            CAST(m.Title AS NVARCHAR(MAX)) AS Title, 
-                            CAST(m.Synopsis AS NVARCHAR(MAX)) AS Synopsis, 
-                            m.PosterUrl
+                            CAST(m.Title AS NVARCHAR(MAX)) AS Title,
+                            m.ReleaseYear,
+                            m.Duration,
+                            CAST(m.Synopsis AS NVARCHAR(MAX)) AS Synopsis,
+                            m.PosterUrl,
+                            m.TMDBId
                         FROM Movies m ";
             var parameters = new List<SqlParameter>();
 
@@ -143,6 +144,8 @@ namespace MovieVault.Data.Repositories
                 Title = reader.SafeGet<string>("Title"),
                 ReleaseYear = reader.SafeGet<int>("ReleaseYear"),
                 Duration = reader.SafeGet<int>("Duration"),
+                Synopsis = reader.SafeGet<string>("Synopsis"),
+                PosterUrl = reader.SafeGet<string>("PosterUrl"),
                 TMDBId = reader.SafeGet<int>("TMDBId"),
             };
         }

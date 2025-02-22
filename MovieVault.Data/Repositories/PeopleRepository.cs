@@ -18,9 +18,9 @@ namespace MovieVault.Data.Repositories
             {
                 new SqlParameter("@FirstName", person.FirstName),
                 new SqlParameter("@LastName", person.LastName),
-                new SqlParameter("@BirthDate", person.BirthDate),
-                new SqlParameter("@Nationality", person.Nationality),
-                new SqlParameter("@PhotoUrl", person.PhotoUrl),
+                new SqlParameter("@BirthDate", person.BirthDate ?? (object)DBNull.Value),
+                new SqlParameter("@Nationality", person.Nationality ?? (object)DBNull.Value),
+                new SqlParameter("@PhotoUrl", person.PhotoUrl ?? (object) DBNull.Value),
                 new SqlParameter("@TMDBId", person.TMDBId)
             };
 

@@ -131,6 +131,7 @@ namespace MovieVault.Core.TMDB
                     PosterUrl = posterUrl,
                     TMDBId = parsedResponse["id"]?.ToObject<int>(),
                     Genres = movieGenres,
+                    People = new List<Person>()
                 };
             }
             catch (Exception ex)
@@ -172,6 +173,10 @@ namespace MovieVault.Core.TMDB
                     int id = director["id"]?.ToObject<int>() ?? 0;
                     string fullName = director["name"]?.ToString();
                     string[] nameParts = fullName.Split(' ');
+                    var profilePath = director["profile_path"]?.ToString();
+                    string? PhotoUrl = !string.IsNullOrEmpty(profilePath)
+                        ? $"{moviePosterBaseUrl}{profilePath}"
+                        : null;
 
                     if (!existingTMDBIds.Contains(id))
                     {
@@ -180,7 +185,8 @@ namespace MovieVault.Core.TMDB
                             TMDBId = director["id"]?.ToObject<int>() ?? 0,
                             FirstName = director["name"]?.ToString()?.Split(' ')[0] ?? "",
                             LastName = director["name"]?.ToString()?.Split(' ').Length > 1 ? director["name"]?.ToString()?.Split(' ').Last() : "",
-                            Role = PersonRole.Director
+                            Role = PersonRole.Director,
+                            PhotoUrl = PhotoUrl
                         });
                         existingTMDBIds.Add(id);
                     }
@@ -193,7 +199,10 @@ namespace MovieVault.Core.TMDB
                         TMDBId = a["id"]?.ToObject<int>() ?? 0,
                         FirstName = a["name"]?.ToString()?.Split(' ')[0] ?? "",
                         LastName = a["name"]?.ToString()?.Split(' ').Length > 1 ? a["name"]?.ToString()?.Split(' ').Last() : "",
-                        Role = PersonRole.Actor
+                        Role = PersonRole.Actor,
+                        PhotoUrl = !string.IsNullOrEmpty(a["profile_path"]?.ToString())
+                            ? $"{moviePosterBaseUrl}{a["profile_path"].ToString()}"
+                            : null
                     })
                     .ToList();
 

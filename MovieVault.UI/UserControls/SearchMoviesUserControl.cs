@@ -6,19 +6,22 @@ using MovieVault.Data.Models;
 namespace MovieVault.UI.UserControls
 {
     public partial class SearchMoviesUserControl : UserControl
-    {   
+    {
         private readonly IMovieService _movieService;
         private readonly ITmdbService _tmdbService;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<SearchMoviesUserControl> _logger;
-        public SearchMoviesUserControl(IMovieService movieService, ITmdbService tmdbService, ILogger<SearchMoviesUserControl> logger)
+        public SearchMoviesUserControl(IMovieService movieService, ITmdbService tmdbService,
+            ILogger<SearchMoviesUserControl> logger, IServiceProvider serviceProvider)
         {
             InitializeComponent();
+            _serviceProvider = serviceProvider;
             _movieService = movieService;
             _tmdbService = tmdbService;
             _logger = logger;
         }
 
-        private async void ButtonSearch_Click(object sender , EventArgs e)
+        private async void ButtonSearch_Click(object sender, EventArgs e)
         {
             noMoviesLabel.Visible = false;
             string query = textBoxSearch.Text.Trim();
@@ -46,7 +49,7 @@ namespace MovieVault.UI.UserControls
                     noMoviesLabel.Visible = true;
                     return;
                 }
-                _logger.LogInformation("{movieCount} movies found with query {query}", mergedList.Count(),query);
+                _logger.LogInformation("{movieCount} movies found with query {query}", mergedList.Count(), query);
                 DisplayMovies(mergedList);
             }
             catch (Exception ex)
@@ -86,8 +89,17 @@ namespace MovieVault.UI.UserControls
 
             foreach (var movie in movies)
             {
-                var movieControl = new MovieThumbnailUserControl(movie);
+                var movieControl = new MovieThumbnailUserControl(movie, _serviceProvider);
                 flowLayoutPanelResults.Controls.Add(movieControl);
+            }
+        }
+
+        private void textBoxSearch_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                buttonSearch.PerformClick();
+                e.SuppressKeyPress = true;
             }
         }
     }
