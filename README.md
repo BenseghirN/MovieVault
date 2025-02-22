@@ -47,7 +47,6 @@ Elle repose sur **WinForms** pour l'interface utilisateur, **SQL Server** pour l
 ```bash
 git clone https://github.com/username/MovieVault.git
 cd MovieVault-Solution
-git checkout dev
 ```
 
 ### 3️⃣ Lancer la base de données avec Docker
